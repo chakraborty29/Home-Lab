@@ -1,0 +1,20 @@
+---
+
+repos:
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: [--strict]
+
+  - repo: https://github.com/thoughtworks/talisman
+    rev: 'v1.32.0'  # Update me!
+    hooks:
+      - id: talisman-commit
+        entry: cmd --githook pre-commit
+
+# - repo: https://github.com/Checkmarx/kics
+#   rev: 'v2.1.0' # change to correct tag or sha
+#   hooks:
+#     - id: kics-scan
+#       verbose: true
