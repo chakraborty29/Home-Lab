@@ -1,10 +1,14 @@
 # Home-Lab
 Raul's Home Lab Scripts and Configs
 
-## Implementing pre-commit security to establish good DevSecOps Practice
-### PR #1 - [feature/implement-dpe-pre-commit-security](https://github.com/chakraborty29/Home-Lab/pull/1)
+## KICS Workaround with Custom Local Hook
 
-**Why?** - This project will deal with `.yaml` files, secrets and IaC such as `Terraform`, `Packer`, `Kubernetes` & `Docker`.
+**Why?** - If you are not able to pull the [checkmarx/kics](https://hub.docker.com/r/checkmarx/kics#!) docker image, or are having trouble bulding docker image due to custom certificates and proxy, this workaround will allow you to copy over your custom certificate into a docker container to build and run [KICS](https:??kics.io/).
+
+### Know Issues
+1. **Security**: This hook is insecurely copying over certificates into the docker container.
+2. **Large Image Files**: This hook creates a 5gb image just to run a KICS scan.
+3. **Slow**: Intitial buildtime takes very long, at a minimum 5 minutes. 
 
 ### What is [pre-commit](https://pre-commit.com/)?
 Git hook scripts that are useful for identifying issues before submission to code review, such as exposed secrets, bad file formats and insecure IaC.

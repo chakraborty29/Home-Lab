@@ -15,8 +15,8 @@ repos:
 
   - repo: local
     hooks:
-      - id: kics-scan
-        name: Kics scan
-        language: docker_image
-        entry: checkmarx/kics:latest scan -v -p /src --exclude-gitignore
+      - id: kics-scan-local
+        name: KICS scan
+        language: system
+        entry: ./pre_commit_kics_scan.sh
         verbose: true
