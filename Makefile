@@ -29,4 +29,5 @@ run-all-files:
 	python3 pre-commit.pyz run --all-files
 
 clean:
+	python3 pre-commit.pyz uninstall
 	rm pre-commit.pyz
