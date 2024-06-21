@@ -1,0 +1,22 @@
+---
+
+repos:
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1  # Update me!
+    hooks:
+      - id: yamllint
+        args: [--strict]
+
+  - repo: https://github.com/thoughtworks/talisman
+    rev: 'v1.32.0'  # Update me!
+    hooks:
+      - id: talisman-commit
+        entry: cmd --githook pre-commit
+
+  - repo: local
+    hooks:
+      - id: kics-scan
+        name: Kics scan
+        language: docker_image
+        entry: checkmarx/kics:latest scan -v -p /src --exclude-gitignore
+        verbose: true
