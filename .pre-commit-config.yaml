@@ -18,5 +18,5 @@ repos:
       - id: kics-scan
         name: Kics scan
         language: docker_image
-        entry: checkmarx/kics:latest scan -v -p /src --exclude-gitignore
+        entry: checkmarx/kics:latest scan -p /src -v
         verbose: true
