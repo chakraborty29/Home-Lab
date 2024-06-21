@@ -7,11 +7,14 @@ repos:
       - id: yamllint
         args: [--strict]
 
-  - repo: https://github.com/thoughtworks/talisman
-    rev: 'v1.32.0'  # Update me!
+  - repo: local
     hooks:
-      - id: talisman-commit
-        entry: cmd --githook pre-commit
+      - id: gitleaks-docker
+        name: Detect hardcoded secrets
+        description: Detect hardcoded secrets using Gitleaks
+        language: docker_image
+        entry: zricethezav/gitleaks:latest protect --verbose --redact --staged
+        verbose: true
 
   - repo: local
     hooks:
