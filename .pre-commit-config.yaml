@@ -1,0 +1,25 @@
+---
+
+repos:
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1  # Update me!
+    hooks:
+      - id: yamllint
+        args: [--strict]
+
+  - repo: local
+    hooks:
+      - id: gitleaks-docker
+        name: Detect hardcoded secrets
+        description: Detect hardcoded secrets using Gitleaks
+        language: docker_image
+        entry: zricethezav/gitleaks:latest protect --verbose --redact --staged
+        verbose: true
+
+  - repo: local
+    hooks:
+      - id: kics-scan
+        name: Kics scan
+        language: docker_image
+        entry: checkmarx/kics:latest scan -p /src -v
+        verbose: true
