@@ -2,7 +2,7 @@
 
 repos:
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.35.1
+    rev: v1.35.1  # Update me!
     hooks:
       - id: yamllint
         args: [--strict]
@@ -13,8 +13,10 @@ repos:
       - id: talisman-commit
         entry: cmd --githook pre-commit
 
-# - repo: https://github.com/Checkmarx/kics
-#   rev: 'v2.1.0' # change to correct tag or sha
-#   hooks:
-#     - id: kics-scan
-#       verbose: true
+  - repo: local
+    hooks:
+      - id: kics-scan
+        name: Kics scan
+        language: docker_image
+        entry: checkmarx/kics:latest scan -v -p /src --exclude-gitignore
+        verbose: true
