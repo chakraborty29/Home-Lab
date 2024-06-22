@@ -21,5 +21,7 @@ repos:
       - id: kics-scan
         name: Kics scan
         language: docker_image
-        entry: checkmarx/kics:latest scan -p /src -v
+        entry: >
+          -v ./kics.config.yaml:/kics/kics
+          checkmarx/kics:latest scan -p /src -v
         verbose: true
