@@ -13,7 +13,7 @@ repos:
         name: Detect hardcoded secrets
         description: Detect hardcoded secrets using Gitleaks
         language: docker_image
-        entry: zricethezav/gitleaks:latest protect --verbose --redact --staged
+        entry: zricethezav/gitleaks:latest protect --redact --staged
         verbose: true
 
   - repo: local
@@ -24,5 +24,5 @@ repos:
         entry: >
           -v /etc/ssl/certs/ZscalerRootCertificate-2048-SHA256.pem:/etc/ssl/certs/cacert.pem
           -v ./kics.config.yaml:/kics/kics
-          checkmarx/kics:latest scan -p /src -v
+          checkmarx/kics:latest scan -p /src
         verbose: true
