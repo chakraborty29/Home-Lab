@@ -1,6 +1,8 @@
-# pre-commit
+## PRE_COMMIT
 pre-commit.pyz
 
+## SSH KEYS
+id_rsa*
 ## PACKER
 # Cache objects
 packer_cache/
