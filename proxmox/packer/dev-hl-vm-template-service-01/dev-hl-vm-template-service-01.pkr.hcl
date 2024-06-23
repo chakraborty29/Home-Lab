@@ -53,11 +53,6 @@ variable "ssh_private_key_file" {
     type = string
 }
 
-variable "ssh_authorized_key" {
-    type = string
-    sensitive = true
-}
-
 # Resource Definiation for the VM Template
 source "proxmox-iso" "dev-hl-vm-template-service-01" {
  
