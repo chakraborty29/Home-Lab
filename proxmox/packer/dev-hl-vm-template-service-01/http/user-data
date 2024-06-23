@@ -3,7 +3,10 @@ autoinstall:
   version: 1
   locale: en_US
   keyboard:
-    layout: de
+    layout: us
+  updates: security
+  apt:
+    disable_suites: [security]
   ssh:
     install-server: true
     allow-pw: true
@@ -20,14 +23,12 @@ autoinstall:
       size: 0
   user-data:
     package_upgrade: false
-    timezone: Europe/Berlin
+    timezone: America/New_York
     users:
-      - name: your-user-name
+      - name: admin
         groups: [adm, sudo]
         lock-passwd: false
         sudo: ALL=(ALL) NOPASSWD:ALL
         shell: /bin/bash
-        # passwd: your-password
-        # - or -
-        # ssh_authorized_keys:
-        #   - your-ssh-key
+        ssh_authorized_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDwouAtyYVj2ZfhnvpqCmnZiH7fWUfaW4RAmxLf6REQ0GSUT56IXDsu94LWhGwe0onYVzmwOP5EgztAwxlLn/LdfRA5In6nysPvnFPbzbH7dFOqB3pG1Ox/CsujHlhdQNo5wkMPbgKROl4H59CaPXAff+/1+Pzz5mHUa1+C/MnQyD6SZ37UIDPVU1gMAtpcEJIoLOcjyNGKTMKF13OOeyTOh3ueOIA/1nj/5TH5dkx0QOrScAD5AAlKH8aeAizJc5HzFTbtaiFGOHpAlR8p7QRNBSkd/CM9NWbWH7EXpuGP87o2BDW6u49NKkywfN+fd4ofSZ95YY2HarUjULUwX2z2p7USZXAsmYHb5E+xAYsfVneLiY+kXeDBDj9rNNN1+PrRbVB24RO+hfNkPiSqAfqvCiNt9freTBdMyQHXvGQGIcUIqAEFT00M5VmnktqUx0/xkv2B+fywhWqwTqdxt1XDlxVJX3C6j9D/IVWckaIUceModgigViB8voxcr6rckRmfa0xXHAkQUZIyL9pNYGkRZMwXuKdGEAHU7sBf204V/Yc8SaKyh6T3LQPFjyDEoUV58BRs/bOmO3GSQ1XUW3VJwGYEru+gaoLFw/2vXh58q/SsBma3NzyDz7rW+U9qIRkeLrGwLqzjTPmNAIBJhMlcHHdSbhHUnm3Svf/v71pLSw== raul-chakraborty@US3497034W1
