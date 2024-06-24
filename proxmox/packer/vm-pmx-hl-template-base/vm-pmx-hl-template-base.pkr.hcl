@@ -1,4 +1,4 @@
-# dev-hl-vm-template-service-01
+# vm-pmx-hl-template-base
 # ---
 # Packer Template to create an Ubuntu Server (jammy) on Proxmox
 
@@ -12,6 +12,10 @@ packer {
 }
 
 # Variable Definitions
+variable "env" {
+  type    = string
+}
+
 variable "proxmox_api_url" {
     type = string
 }
@@ -54,7 +58,7 @@ variable "ssh_private_key_file" {
 }
 
 # Resource Definiation for the VM Template
-source "proxmox-iso" "dev-hl-vm-template-service-01" {
+source "proxmox-iso" "vm-template" {
  
     # Proxmox Connection Settings
     proxmox_url = "${var.proxmox_api_url}"
@@ -66,8 +70,8 @@ source "proxmox-iso" "dev-hl-vm-template-service-01" {
     # VM General Settings
     node = "${var.proxmox_node}"
     vm_id = "${var.vm_id}"
-    vm_name = "${var.vm_name}"
-    template_description = "Promox Template Image for ${var.vm_name}, generated on ${timestamp()}"
+    vm_name = "${var.env}-${var.vm_name}-${var.vm_id}"
+    template_description = "Created template ${var.env}-${var.vm_name}-${var.vm_id} by HasiCorp Packer. Generated on ${timestamp()}."
 
     # VM OS Settings
     # (Option 1) Local ISO File
@@ -115,7 +119,7 @@ source "proxmox-iso" "dev-hl-vm-template-service-01" {
         "<esc><wait><esc><wait>",
         "<f6><wait><esc><wait>",
         "<bs><bs><bs><bs><bs>",
-        "autoinstall ds=nocloud-net;s=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ ",
+        "autoinstall ds=nocloud-net;s=http://${var.http_bind_address}:8802/ ",
         "--- <enter>"
     ]
     boot = "c"
@@ -124,7 +128,7 @@ source "proxmox-iso" "dev-hl-vm-template-service-01" {
     # PACKER Autoinstall Settings
     http_directory = "http" 
     # (Optional) Bind IP Address and Port
-    http_bind_address = "${var.http_bind_address}"
+    http_bind_address = "0.0.0.0"
     http_port_min = 8802
     http_port_max = 8802
 
@@ -144,8 +148,8 @@ source "proxmox-iso" "dev-hl-vm-template-service-01" {
 # Build Definition to create the VM Template
 build {
     
-    name = "${var.vm_name}"
-    sources = ["source.proxmox-iso.dev-hl-vm-template-service-01"]
+    name = "${var.env}-${var.vm_name}-${var.vm_id}"
+    sources = ["source.proxmox-iso.vm-template"]
 
     # Provisioning the VM Template for Cloud-Init Integration in Proxmox #1
     provisioner "shell" {
