@@ -82,7 +82,7 @@ source "proxmox-iso" "vm-template" {
 }
 ```
 
-If you encounter issues with `Packer` hosting the `user-data` for `cloud-init` or with `Proxmox` accessing your LAN, especially when using `WSL`, the following workaround may be necessary. Since `Packer` binds the HTTP server to the `WSL localhost` using `http_bind_address = "0.0.0.0"`, and Proxmox cannot access this address, you can **define a separate variable** for the address. This allows Packer to bind to the WSL localhost while Proxmox accesses the address from the external LAN. The address should correspond to the work machine running Packer.
+If you encounter issues with `Packer` hosting the `user-data` for `cloud-init` or with `Proxmox` accessing your LAN, especially when using `WSL`, the following workaround may be necessary. Since Packer binds the HTTP server to the `WSL localhost` using `http_bind_address = "0.0.0.0"`, and Proxmox cannot access this address, you can **define a separate variable** for the address. This allows Packer to bind to the WSL localhost while Proxmox accesses the address from the external LAN. The address should correspond to the work machine running Packer.
 
 ```
     boot_command = [
