@@ -27,7 +27,7 @@ source "proxmox-iso" "vm-template" {
 ### Essential Configuration for proxmox-iso builder
 Ensure the disk format is set to `raw` when utilizing a local ISO image from Proxmox. The `storage_pool_type` is deprecated and should be omitted:
 
-```json
+```
 source "proxmox-iso" "vm-template" {
     ...
 
@@ -46,7 +46,7 @@ source "proxmox-iso" "vm-template" {
 The subsequent boot commands are necessary for Packer to interact with Ubuntu servers:
 
 #### For Ubuntu Focal - 20.04
-```json
+```
 source "proxmox-iso" "vm-template" {
     ...
 
@@ -64,7 +64,7 @@ source "proxmox-iso" "vm-template" {
 ```
 
 #### For Ubuntu Jammy 22.04
-```json
+```
 source "proxmox-iso" "vm-template" {
     ...
 
