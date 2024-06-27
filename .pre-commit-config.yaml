@@ -13,7 +13,13 @@ repos:
         name: Detect hardcoded secrets
         description: Detect hardcoded secrets using Gitleaks
         language: docker_image
-        entry: zricethezav/gitleaks:latest protect --verbose --redact --staged
+        entry: >
+          -u root:root
+          zricethezav/gitleaks:latest
+          protect
+          --verbose
+          --redact
+          --staged
         verbose: true
 
   - repo: local
