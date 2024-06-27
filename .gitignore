@@ -1,5 +1,5 @@
-## PRE_COMMIT
-pre-commit.pyz
+## Traefik
+reverse-proxy/traefik/traefik/data/acme.json
 
 ## SSH KEYS
 id_rsa*

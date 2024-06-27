@@ -1,0 +1,47 @@
+---
+
+http:
+  # region routers
+  routers:
+    proxmox:
+      entryPoints:
+        - "https"
+      rule: "Host(`pmx.example.com`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: proxmox
+
+  services:
+    proxmox:
+      loadBalancer:
+        servers:
+          - url: "https://{proxmox.node.ip.1}:8006"
+          - url: "https://{proxmox.node.ip.2}:8006"
+          - url: "https://{proxmox.node.ip.3}:8006"
+        passHostHeader: true
+
+  middlewares:
+    https-redirectscheme:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+    default-headers:
+      headers:
+        frameDeny: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        stsPreload: true
+        stsSeconds: 15552000
+        customFrameOptionsValue: SAMEORIGIN
+        customRequestHeaders:
+          X-Forwarded-Proto: https
+
+    secured:
+      chain:
+        middlewares:
+          - default-headers
