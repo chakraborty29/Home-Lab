@@ -1,6 +1,8 @@
 ## Traefik
 reverse-proxy/traefik/traefik/data/acme.json
 
+## SSH KEYS
+id_rsa*
 ## PACKER
 # Cache objects
 packer_cache/
