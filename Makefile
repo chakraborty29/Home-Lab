@@ -7,20 +7,21 @@ all: check-dependencies install-pre-commit
 check-dependencies:
 	@echo "Checking for python3..."
 	@command -v python3 >/dev/null 2>&1 || { echo >&2 "Python3 is not installed. Please install Python3 to continue."; exit 1; }
+	@echo "Checking for pip3..."
+	@command -v pip3 >/dev/null 2>&1 || { echo >&2 "pip3 not found. Please install Python 3 and pip3."; exit 1; }
 	@echo "Checking for docker..."
 	@command -v docker >/dev/null 2>&1 || { echo >&2 "Docker is not installed. Please install Docker to continue."; exit 1; }
 
 install-pre-commit:
 	@echo "Checking for pre-commit..."
-	@python3 pre-commit.pyz --version >/dev/null 2>&1 || { echo >&2 "Installing 'pre-commit'..."; wget -O pre-commit.pyz https://github.com/pre-commit/pre-commit/releases/download/v${PRECOMMIT_VERSION}/pre-commit-${PRECOMMIT_VERSION}.pyz; }
-	python3 pre-commit.pyz install
+	@pre-commit --version >/dev/null 2>&1 || { echo >&2 "Installing 'pre-commit'..."; pip3 install pre-commit; }
+	pre-commit install
 
 autoupdate:
-	python3 pre-commit.pyz autoupdate
+	pre-commit autoupdate
 
 run-all-files:
-	python3 pre-commit.pyz run --all-files
+	pre-commit run --all-files
 
 clean:
-	python3 pre-commit.pyz uninstall
-	rm pre-commit.pyz
+	pre-commit uninstall
