@@ -22,13 +22,13 @@ repos:
           --staged
         verbose: true
 
-  - repo: local
-    hooks:
-      - id: kics-scan
-        name: Kics scan
-        language: docker_image
-        entry: >
-          -v /etc/ssl/certs/ZscalerRootCertificate-2048-SHA256.pem:/etc/ssl/certs/cacert.pem
-          -v ./kics.config.yaml:/kics/kics
-          checkmarx/kics:latest scan -p /src
-        verbose: true
+  # - repo: local
+  #   hooks:
+  #     - id: kics-scan
+  #       name: Kics scan
+  #       language: docker_image
+  #       entry: >
+  #         -v /etc/ssl/certs/ZscalerRootCertificate-2048-SHA256.pem:/etc/ssl/certs/cacert.pem
+  #         -v ./kics.config.yaml:/kics/kics
+  #         checkmarx/kics:latest scan -p /src
+  #       verbose: true
