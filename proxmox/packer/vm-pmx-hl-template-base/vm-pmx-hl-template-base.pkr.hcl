@@ -45,7 +45,19 @@ variable "vm_name" {
     type = string
 }
 
+variable "cores" {
+    type = string
+}
+
+variable "memory" {
+    type = string
+}
+
 variable "http_bind_address" {
+    type = string
+}
+
+variable "http_bind_port" {
     type = string
 }
 
@@ -98,10 +110,10 @@ source "proxmox-iso" "vm-template" {
     }
 
     # VM CPU Settings
-    cores = "2"
+    cores = "${var.cores}"
     
     # VM Memory Settings
-    memory = "2048" 
+    memory = "${var.memory}"
 
     # VM Network Settings
     network_adapters {
@@ -119,7 +131,7 @@ source "proxmox-iso" "vm-template" {
         "<esc><wait><esc><wait>",
         "<f6><wait><esc><wait>",
         "<bs><bs><bs><bs><bs>",
-        "autoinstall ds=nocloud-net;s=http://${var.http_bind_address}:8802/ ",
+        "autoinstall ds=nocloud-net;s=http://${var.http_bind_address}:${var.http_bind_port}/ ",
         "--- <enter>"
     ]
     boot = "c"
@@ -129,8 +141,8 @@ source "proxmox-iso" "vm-template" {
     http_directory = "http" 
     # (Optional) Bind IP Address and Port
     http_bind_address = "0.0.0.0"
-    http_port_min = 8802
-    http_port_max = 8802
+    http_port_min = "${var.http_bind_port}"
+    http_port_max = "${var.http_bind_port}"
 
     ssh_username = "${var.ssh_username}"
 
