@@ -20,7 +20,7 @@ variable "target_node" {
     type = string
 }
 
-variable "vmid" {
+variable "agent" {
     type = string
 }
 

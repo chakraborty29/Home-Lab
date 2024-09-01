@@ -5,7 +5,7 @@
 resource "proxmox_vm_qemu" "your-vm" {
     
     # VM General Settings
-    name = "${var.env}-${var.name}-${var.vmid}"
+    name = "${var.env}-${var.name}-${var.agent}"
     target_node = "${var.target_node}"
     desc = "Created template by HasiCorp Terraform on ${timestamp()}."
 
