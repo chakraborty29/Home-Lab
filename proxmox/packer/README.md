@@ -87,7 +87,7 @@ If you encounter issues with `Packer` hosting the `user-data` for `cloud-init` o
 ```
     boot_command = [
         ...
-        "autoinstall ds=nocloud-net;s=http://${var.http_bind_address}:8802/ ",
+        "autoinstall ds=nocloud-net;s=http://${var.http_bind_address}:${var.http_bind_port}/ ",
         ...
     ]
 ```
@@ -112,27 +112,30 @@ I have not yet found a secure solution for this.
 
 ### Example  vars.pkvars.hcl file:
 ```
-env = "test"
-proxmox_api_url = "http://{YOUR_PROXMOX_IP}:8006/api2/json"  # Your Proxmox IP Address
-proxmox_api_token_id = "root@pam!Packer"  # API Token ID
+env = "dev"
+proxmox_api_url = "http://<proxmox-api-addr>/api2/json"  # Your Proxmox IP Address
+proxmox_api_token_id = ""  # API Token ID
 proxmox_api_token_secret = ""
-proxmox_node = "hl-proxmox-test"
 proxmox_iso_file = "local:iso/ubuntu-20.04.6-live-server-amd64.iso"
-vm_id = "110"
-vm_name = "vm-pmx-hl-template-base"
+proxmox_node = "dev-pve-01"
+vm_name = ""
+agent = "1"
+cores = "1"
+memory = "2048"
 http_bind_address = ""
+http_bind_port = ""
 ssh_username = ""
-ssh_private_key_file = "./ssh/id_rsa"
+ssh_private_key_file = "./files/ssh/id_rsa"
 ```
 
 All that is left to do:
 Validating with Packer:
 ```bash
-packer validate -var-file='./vars.pkrvars.hcl' ./hcl
+packer validate -var-file='./vars.pkrvars.hcl' ./template.pkr.hcl
 ```
 Building with Packer:
 ```bash
-packer build -var-file='./vars.pkrvars.hcl' ./hcl
+packer build -var-file='./vars.pkrvars.hcl' ./template.pkr.hcl
 ```
 
 ## To-dos: 
