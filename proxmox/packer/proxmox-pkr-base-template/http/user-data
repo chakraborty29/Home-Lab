@@ -22,7 +22,7 @@ autoinstall:
     swap:
       size: 0
   user-data:
-    package_upgrade: false
+    package_upgrade: true
     timezone: America/New_York
     users:
       - name: admin
