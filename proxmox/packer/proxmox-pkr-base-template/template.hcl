@@ -12,6 +12,8 @@ packer {
 }
 
 # Variable Definitions
+######################################################################################################
+######################################################################################################
 variable "env" {
   type    = string
 }
@@ -37,7 +39,7 @@ variable "proxmox_iso_file" {
     type = string
 }
 
-variable "vm_id" {
+variable "agent" {
     type = string
 }
 
@@ -68,6 +70,8 @@ variable "ssh_username" {
 variable "ssh_private_key_file" {
     type = string
 }
+######################################################################################################
+######################################################################################################
 
 # Resource Definiation for the VM Template
 source "proxmox-iso" "vm-template" {
@@ -81,9 +85,8 @@ source "proxmox-iso" "vm-template" {
     
     # VM General Settings
     node = "${var.proxmox_node}"
-    vm_id = "${var.vm_id}"
-    vm_name = "${var.env}-${var.vm_name}-${var.vm_id}"
-    template_description = "Created template ${var.env}-${var.vm_name}-${var.vm_id} by HasiCorp Packer. Generated on ${timestamp()}."
+    vm_name = "${var.env}-${var.vm_name}-${var.agent}"
+    template_description = "Created template by HasiCorp Packer on ${timestamp()}."
 
     # VM OS Settings
     # (Option 1) Local ISO File
@@ -99,7 +102,7 @@ source "proxmox-iso" "vm-template" {
     scsi_controller = "virtio-scsi-pci"
 
     # Diable KVM Agent
-    disable_kvm = true
+    disable_kvm = false
 
     disks {
         disk_size = "20G"
@@ -150,17 +153,16 @@ source "proxmox-iso" "vm-template" {
 
     # Use Docker to spin up the run file where the ssh key gets created in docker and then once the provisioning is done
     # we discard the docker deleting keys, making this secure
-    # ssh_private_key_file = "~/.ssh/id_rsa"
     ssh_private_key_file = "${var.ssh_private_key_file}"
 
     # Raise the timeout, when installation takes longer
-    ssh_timeout = "90m"
+    ssh_timeout = "120m"
 }
 
 # Build Definition to create the VM Template
 build {
     
-    name = "${var.env}-${var.vm_name}-${var.vm_id}"
+    name = "${var.env}-${var.vm_name}-${var.agent}"
     sources = ["source.proxmox-iso.vm-template"]
 
     # Provisioning the VM Template for Cloud-Init Integration in Proxmox #1
@@ -188,6 +190,31 @@ build {
     # Provisioning the VM Template for Cloud-Init Integration in Proxmox #3
     provisioner "shell" {
         inline = [ "sudo cp /tmp/99-pve.cfg /etc/cloud/cloud.cfg.d/99-pve.cfg" ]
+    }
+
+    
+    provisioner "file" {
+        source = "files/scripts/docker_install.sh"
+        destination = "/tmp/docker_install.sh"
+    }
+
+    provisioner "file" {
+        source = "files/scripts/ansible_install.sh"
+        destination = "/tmp/ansible_install.sh"
+    }
+
+    provisioner "shell" {
+        inline = [ 
+            "chmod +x /tmp/docker_install.sh",
+            "sudo /tmp/docker_install.sh" 
+        ]
+    }
+
+    provisioner "shell" {
+        inline = [ 
+            "chmod +x /tmp/ansible_install.sh",
+            "sudo /tmp/ansible_install.sh" 
+        ]
     }
 
     # Provisioning the VM Template with Docker Installation #4
