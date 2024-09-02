@@ -27,10 +27,17 @@ autoinstall:
     package_upgrade: true
     timezone: America/New_York
     users:
-      - name: admin
+      - name: cloudinit-admin
         groups: [adm, sudo]
-        lock-passwd: false
+        lock-passwd: true
         sudo: ALL=(ALL) NOPASSWD:ALL
         shell: /bin/bash
         ssh_authorized_keys:
-          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCtZOo5HfzbkCrCkvAByFaGKIQevNGGIJY9BWvPvXllPdv1ARDZSUH6Mq22brEJkkHDHb+qETTLqQBK5vMozJjaxHGmz4G4bDejZlV/YaH1QghIn4GRSu+cNYvzYrJOp66sV84A5Ipg9zTTk5LHJi7S+HM5EEGTMTFe72kxaC/Rn84e8E7mwb19gPlj6jnoaNQZw3hRDL+rN8+mp7JQmwzjzGEzxl+uV/LSKOIg72MBpS1596vxegBnsrWvjDapHpV2dugg9iBFTFm14J4atNzRE+xZALhhnnAS8/bOCYf6ymDTxpOOkkixh6ffssSRKYq8V4vg5pb2YZZ53oTvMuohtlYktnFv/1NcytebdO8pWpsm5qNqTnZbxYNxd7zcRUsAmsukeYKQaxIOytdZUfh0IMzVTLmniWvS/yw+TQlT8c8GTg8yhERfJulQACD2ZtxVwFrH1RWCNV9Y/Wli3aUBbgFMmsmqkeqavGtpQKDC57tDukOBtBscA2RLHXkV+xYBDM6trLwtS7AbqzKk/uxKHOGVzu1WSpeduePvapJz5xiOsFqAVklSkU5v7I9f5n7BAEL4cEQgCCDWry6afJVAHLtHiTFQEt7jYz1LN7vLYKniARJvC1e1g/enj5TVWIPy20NcIvTUGsrETXUh5wNbbZxmOuhF7K4VxhSbkv5cvQ== raul@Rauls-MacBook-Pro.local
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCucoOb+3c9wAp2q+SFP4G4sRb+zp2T9c1nFC4WmVtvJ6YacyiLU+gMZ0SV1yysR7Htar8V8tlth3AgZblJnall5zl4LHcFHe8qlegpTYSiDMil/P49g1/o9Df8uWoK5TpjTn9KjdBPJzGPd0AmlxQtFv7BRpnQz00gu/bs6NZuowVV5+ByEI7dNKV9MwganvMQjP29hlcbPrgj5NLhrXpKhGP3Ab/FDsnDiHc1HfrSeStr+nIXh86wTFD1M+nGg31TEf4DNd5tkKN4aLHyx01M3Giujtyv09BYAFcRdpwihNqRJt+vTHhVF2yJc2NtGmm5e3X+Hw6+vfSy/Z8tZX4AFEJwG9e4AvZPGrRT6agabkj6ZKpj9jnoXuwIz/WZU9XXA+rAstbrmss2u8OwHhhr9jMCpTMuwUU/hJXfQCQOvAF8s6B1Kk/xxW72M8WFRZbvCssxwIkjCpDO50l5U86j/dSwYtVuoNu8/0D12KhoL6xZH5+yVr9oaH36x6rYHwh81PV9a9EAz0fQMf38o1tOoXSmbrlviRz7joSLVQYJEIrgQkas9QJZZVKXRfEsV1wOh9LAu1iJrHzOtxQ2VOclI/vMnj2t0g89SGOq7KlmjNijWErwOQbURBl3QgrAk0kB04VmPjkNaVfWsdfv5S/gxbxVtpKAPfwQV3YNp0IirQ== cloudinit-admin
+      - name: ansible
+        groups: [adm, sudo]
+        lock-passwd: true
+        sudo: ALL=(ALL) NOPASSWD:ALL
+        shell: /bin/bash
+        ssh_authorized_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDNeCKQfKOZdutu/+LEbNRyfbynjsMOh45RJ8ET9BmXyTwRjTNKHpI4sqF1mrler9gsEDsYavx2dnnVsWGQs/NxUQ66tpcsMY3fmA9lMVfwXQWjmNjPbl+RwoTo6lndRn56peBt2JDOjpTbISKAzwnzEn/uL7ZAju5/sORrusj19AUMhZa0kmC0wx4WAq6tLxxFyMvjWpCsNC0CyRDV1ytEu+Au0AQFQUSaoaCpxQ4kEnIdL7pr3rSzVcFXEg+c/1zuK76u2kjW+JSLA5hRJp8DqSRjALvlSr02svZLchISy6ZTl6sj72dVsagHMpu29IL7bqZmhForQuKOsXiaoYPBp+WUnMmjuNEIP9lEgfYOqZJb5VaWFLl+xxIaZ2iA63wVNy0MwayKIYRpa2+4rRZ2x44ZH65o9gDHWvuZiOFsYFtUIYAE/hlxJ3zo9RIZql/3hqruLSjkLCPJ5cKeoldcQv3pdC+560H3BsywG+ednikoW/aOAfKW8mKuS5/CBx0GoHzDmx8vK17h11PDpHDwaCorZE1gvhY2fGsfBGTGP5yHpuFWc3gsn+08rQQKmh2fh1yh9e7LqnFHSa+n+LVUBLsjj4LrZsItsTiHX/8nZ8LgjDSVkPuIcdYv/Y98ZaekKLTigMXoTuqCid6M+czLtKyrh2q1dBm5efV37O88Pw== ansible
