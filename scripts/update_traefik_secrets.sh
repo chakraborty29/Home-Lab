@@ -3,6 +3,7 @@
 # source file
 # source .traefik-secrets.sh 
 # Define the secrets and config YAML files
+SECRETS_FILE="traefik_secrets.yml"
 CONFIG_FILE="config.yml"
 DOCKER_COMPOSE_FILE="../docker-compose.yml"
 
@@ -44,11 +45,11 @@ sed -i -e "s|{CF_API_EMAIL}|$CF_API_EMAIL|g" traefik.yml
 
 echo "Configuration updated in traefik.yml."
 
-sed -i -e "s|{pve1-domain-name}|$CF_API_EMAIL|g" \
-       -e "s|{pve2-domain-name}|$CF_API_KEY|g" \
-       -e "s|{pve2-domain-name}|$TRAEFIK_USER|g" \
-       -e "s|{pve2-domain-name}|$TRAEFIK_DOMAIN|g" \
-       -e "s|{pve2-domain-name}|$DEV_DOMAIN|g" \
+sed -i -e "s|{CF_API_EMAIL}|$CF_API_EMAIL|g" \
+       -e "s|{CF_API_KEY}|$CF_API_KEY|g" \
+       -e "s|{TRAEFIK_USER}|$TRAEFIK_USER|g" \
+       -e "s|{TRAEFIK_DOMAIN}|$TRAEFIK_DOMAIN|g" \
+       -e "s|{DEV_DOMAIN}|$DEV_DOMAIN|g" \
        "$DOCKER_COMPOSE_FILE"
 
 echo "Configuration updated in $DOCKER_COMPOSE_FILE."
