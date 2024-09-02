@@ -1,0 +1,8 @@
+# playbooks/configure_builder_server.yml
+- name: Configure Builder Server
+  hosts: builders
+  become: yes
+  vars_files:
+    - ../vars/configure_builder_server.yml
+  roles:
+    - update_repositories
