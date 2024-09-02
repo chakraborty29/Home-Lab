@@ -16,6 +16,8 @@ autoinstall:
   packages:
     - qemu-guest-agent
     - sudo
+    - net-tools
+    - apache2-utils
   storage:
     layout:
       name: direct
