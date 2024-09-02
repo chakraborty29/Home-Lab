@@ -3,30 +3,109 @@
 http:
   # region routers
   routers:
+    pve1:
+      entryPoints:
+        - "https"
+      rule: "Host(`{pve1-domain-name}`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: pve1
+    pve2:
+      entryPoints:
+        - "https"
+      rule: "Host(`{pve2-domain-name}`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: pve2
+    pve3:
+      entryPoints:
+        - "https"
+      rule: "Host(`{pve3-domain-name}`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: pve3
     proxmox:
       entryPoints:
         - "https"
-      rule: "Host(`pmx.example.com`)"
+      rule: "Host(`{pve-domain-name}`)"
       middlewares:
         - default-headers
         - https-redirectscheme
       tls: {}
       service: proxmox
+    pihole:
+      entryPoints:
+        - "https"
+      rule: "Host(`{pihole-domain-name}`)"
+      middlewares:
+        - redirectregex-pihole
+        - default-headers
+        - addprefix-pihole
+        - https-redirectscheme
+      tls: {}
+      service: pihole
+    opnsense:
+      entryPoints:
+        - "https"
+      rule: "Host(`{opnsense-domain-name}`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: opnsense
 
   services:
+    pve1:
+      loadBalancer:
+        servers:
+          - url: "https://{pve1-ip-address}:8006"
+        passHostHeader: true
+    pve2:
+      loadBalancer:
+        servers:
+          - url: "https://{pve2-ip-address}:8006"
+        passHostHeader: true
+    pve3:
+      loadBalancer:
+        servers:
+          - url: "https://{pve3-ip-address}:8006"
+        passHostHeader: true
     proxmox:
       loadBalancer:
         servers:
-          - url: "https://{proxmox.node.ip.1}:8006"
-          - url: "https://{proxmox.node.ip.2}:8006"
-          - url: "https://{proxmox.node.ip.3}:8006"
+          - url: "https://{pve1-ip-address}:8006"
+          - url: "https://{pve2-ip-address}:8006"
+          - url: "https://{pve3-ip-address}:8006"
+        passHostHeader: true
+    pihole:
+      loadBalancer:
+        servers:
+          - url: "http://{pihole-ip-address}:80"
+        passHostHeader: true
+    opnsense:
+      loadBalancer:
+        servers:
+          - url: "https://{opnsense-ip-address}"
         passHostHeader: true
 
   middlewares:
+    addprefix-pihole:
+      addPrefix:
+        prefix: "/admin"
     https-redirectscheme:
       redirectScheme:
         scheme: https
         permanent: true
+    redirectregex-pihole:
+      redirectRegex:
+        regex: "/admin/(.*)"
+        replacement: /
 
     default-headers:
       headers:
@@ -41,7 +120,16 @@ http:
         customRequestHeaders:
           X-Forwarded-Proto: https
 
+    default-whitelist:
+      ipAllowList:
+        sourceRange:
+          - 127.0.0.1/32
+          - 10.0.0.0/8
+          - 172.16.0.0/12
+          - 192.168.0.0/16
+
     secured:
       chain:
         middlewares:
+          - default-whitelist
           - default-headers
