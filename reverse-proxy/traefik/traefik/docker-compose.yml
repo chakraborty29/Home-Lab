@@ -15,34 +15,29 @@ services:
       - 80:80
       - 443:443
     environment:
-      - CF_API_EMAIL=cloudflare-email@example.com
-      - CF_API_KEY=cloudflare-api-key
+      - CF_API_EMAIL=CF_API_EMAIL
+      - CF_API_KEY={CF_API_KEY}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /home/admin/traefik/data/traefik.yml:/traefik.yml:ro
-      - /home/admin/traefik/data/acme.json:/acme.json
-      - /home/admin/traefik/data/config.yml:/config.yml:ro
+      - /home/{TRAEFIK_USER}/traefik/data/traefik.yml:/traefik.yml:ro
+      - /home/{TRAEFIK_USER}/traefik/data/acme.json:/acme.json
+      - /home/{TRAEFIK_USER}/traefik/data/config.yml:/config.yml:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=http"
-      # change
-      - "traefik.http.routers.traefik.rule=Host(`td.example.com`)"
-      # change
-      - "traefik.http.middlewares.traefik-auth.basicauth.users=<USER>:<HASHED-PASSWORD>"
+      - "traefik.http.routers.traefik.rule=Host(`{TRAEFIK_DOMAIN}`)"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_CREDS}"
       - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
       - "traefik.http.routers.traefik-secure.entrypoints=https"
-      # change
-      - "traefik.http.routers.traefik-secure.rule=Host(`td.example.com`)"
+      - "traefik.http.routers.traefik-secure.rule=Host(`{TRAEFIK_DOMAIN}`)"
       - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-secure.tls=true"
       - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
-      # change
-      - "traefik.http.routers.traefik-secure.tls.domains[0].main=example.com"
-      # change
-      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.example.com"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main={DEV_DOMAIN}"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.{DEV_DOMAIN}"
       - "traefik.http.routers.traefik-secure.service=api@internal"
 
 networks:
