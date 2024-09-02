@@ -14,7 +14,9 @@ sed -i -e "s|{pve1-domain-name}|$PVE1_DOMAIN_NAME|g" \
        -e "s|{pihole-ip-address}|$PIHOLE_IP_ADDRESS|g" \
        -e "s|{opnsense-domain-name}|$OPNSENSE_DOMAIN_NAME|g" \
        -e "s|{opnsense-ip-address}|$OPNSENSE_IP_ADDRESS|g" \
-       "$CONFIG_FILE"
+       config.yml
+
+sed -i -e "s|{CF_API_EMAIL}|$CF_API_EMAIL|g" traefik.yml
 
 echo "Configuration updated in $CONFIG_FILE."
 
