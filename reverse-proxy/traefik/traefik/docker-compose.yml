@@ -16,47 +16,30 @@ services:
       - 443:443
     environment:
       - CF_API_EMAIL=CF_API_EMAIL
-      - CF_API_KEY=CF_API_KEY
+      - CF_API_KEY={CF_API_KEY}
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-      - /home/${TRAEFIK_USER}/traefik/data/traefik.yml:/traefik.yml:ro
-      - /home/${TRAEFIK_USER}/traefik/data/acme.json:/acme.json
-      - /home/${TRAEFIK_USER}/traefik/data/config.yml:/config.yml:ro
+      - /home/{TRAEFIK_USER}/traefik/data/traefik.yml:/traefik.yml:ro
+      - /home/{TRAEFIK_USER}/traefik/data/acme.json:/acme.json
+      - /home/{TRAEFIK_USER}/traefik/data/config.yml:/config.yml:ro
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=http"
-      - "traefik.http.routers.traefik.rule=Host(`${TRAEFIK_DOMAIN}`)"
+      - "traefik.http.routers.traefik.rule=Host(`{TRAEFIK_DOMAIN}`)"
       - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_CREDS}"
       - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
       - "traefik.http.routers.traefik-secure.entrypoints=https"
-      # change
-      - "traefik.http.routers.traefik-secure.rule=Host(`${TRAEFIK_DOMAIN}`)"
+      - "traefik.http.routers.traefik-secure.rule=Host(`{TRAEFIK_DOMAIN}`)"
       - "traefik.http.routers.traefik-secure.middlewares=traefik-auth"
       - "traefik.http.routers.traefik-secure.tls=true"
       - "traefik.http.routers.traefik-secure.tls.certresolver=cloudflare"
-      # change
-      - "traefik.http.routers.traefik-secure.tls.domains[0].main=${DEV_DOMAIN}"
-      # change
-      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.${DEV_DOMAIN}"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].main={DEV_DOMAIN}"
+      - "traefik.http.routers.traefik-secure.tls.domains[0].sans=*.{DEV_DOMAIN}"
       - "traefik.http.routers.traefik-secure.service=api@internal"
 
 networks:
   proxy:
-    external: true
-
-secrets:
-  CF_API_KEY:
-    external: true
-  CF_API_EMAIL:
-    external: true
-  TRAEFIK_USER:
-    external: true
-  TRAEFIK_DOMAIN:
-    external: true
-  TRAEFIK_CREDS:
-    external: true
-  DEV_DOMAIN:
     external: true
