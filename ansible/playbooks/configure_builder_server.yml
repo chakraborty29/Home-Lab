@@ -3,7 +3,65 @@
   hosts: builders
   become: yes
   vars_files:
-    - ../vars/configure_builder_server.yml
-  roles:
-    - git
-    - clone_repositories
+    - ../vars/main.yml
+  tasks:
+    - name: Check if GitHub SSH key exists
+      stat:
+        path: /home/ansible/.ssh/github_rsa
+      register: github_key_stat
+
+    - name: Copy GitHub private key
+      copy:
+        src: "{{ github_private_key_src }}"
+        dest: /home/ansible/.ssh/github_rsa
+        owner: ansible
+        group: ansible
+        mode: '0600'
+      when: not github_key_stat.stat.exists
+
+    - name: Start SSH agent
+      shell: |
+        eval "$(ssh-agent -s)"
+        ssh-add /home/ansible/.ssh/github_rsa
+      become: yes
+      become_user: ansible
+      when: not github_key_stat.stat.exists
+
+    - name: Ensure git is installed
+      apt:
+        name: git
+        state: present
+
+    - name: Cloning homelab repository
+      git:
+        repo: "{{ homelab_repo_url }}"
+        dest: /home/ansible/homelab
+        version: develop
+        key_file: /home/ansible/.ssh/github_rsa
+        accept_hostkey: yes
+        update: yes
+
+    - name: Cloning credentials repository
+      git:
+        repo: "{{ credentials_repo_url }}"
+        dest: /home/ansible/credentials
+        version: develop
+        key_file: /home/ansible/.ssh/github_rsa
+        accept_hostkey: yes
+        update: yes
+
+    - name: Set ownership of credentials directory
+      file:
+        path: /home/ansible/credentials
+        state: directory
+        owner: ansible
+        group: ansible
+        recurse: yes
+
+    - name: Set ownership of homelab directory
+      file:
+        path: /home/ansible/homelab
+        state: directory
+        owner: ansible
+        group: ansible
+        recurse: yes

@@ -1,2 +1,5 @@
 [builders]
 ansible-builder-1 ansible_host=10.29.30.105
+
+[traefik]
+traefik-1 ansible_host=10.29.30.106
