@@ -38,6 +38,13 @@
       args:
         chdir: /home/traefik-user/traefik
 
+    - name: Create docker network proxy with sudo
+      command: sudo docker network create proxy
+      args:
+        chdir: /home/traefik-user/traefik
+      become: yes
+      become_user: root
+
     - name: Run docker-compose up with sudo
       command: sudo docker-compose up -d --force-recreate
       args:
