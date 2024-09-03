@@ -24,7 +24,7 @@
         path: /home/ansible/.ssh/ansible_id_rsa
       register: ansible_key_stat
 
-    - name: Copy GitHub private key
+    - name: Copy Assible private key
       copy:
         src: "{{ github_private_key_src }}"
         dest: /home/ansible/.ssh/ansible_id_rsa
