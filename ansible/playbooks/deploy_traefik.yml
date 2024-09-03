@@ -4,7 +4,7 @@
   tasks:
     - name: Copy Traefik files to target server
       copy:
-        src: "{{ playbook_dir }}/../homelab/apps/traefik/traefik/"
+        src: "~/homelab/apps/traefik/traefik/"
         dest: /home/traefik-user/traefik/
         owner: traefik-user
         group: traefik-user
@@ -13,7 +13,7 @@
 
     - name: Copy update_traefik_secrets.sh script to target server
       copy:
-        src: "{{ playbook_dir }}/../homelab/scripts/update_traefik_secrets.sh"
+        src: "~/homelab/scripts/update_traefik_secrets.sh"
         dest: /home/traefik-user/traefik/data/update_traefik_secrets.sh
         owner: traefik-user
         group: traefik-user
@@ -21,7 +21,7 @@
 
     - name: Copy credentials to target server
       copy:
-        src: "{{ playbook_dir }}/../credentials/apps/traefik/"
+        src: "~/credentials/apps/traefik/"
         dest: /home/traefik-user/traefik/data/
         owner: traefik-user
         group: traefik-user
