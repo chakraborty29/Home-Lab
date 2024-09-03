@@ -26,7 +26,7 @@
 
     - name: Copy Assible private key
       copy:
-        src: "{{ github_private_key_src }}"
+        src: "{{ ansible_private_key_src }}"
         dest: /home/ansible/.ssh/ansible_id_rsa
         owner: ansible
         group: ansible
