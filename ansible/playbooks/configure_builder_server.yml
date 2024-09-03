@@ -19,6 +19,20 @@
         mode: '0600'
       when: not github_key_stat.stat.exists
 
+    - name: Check if Assible SSH key exists
+      stat:
+        path: /home/ansible/.ssh/ansible_id_rsa
+      register: ansible_key_stat
+
+    - name: Copy GitHub private key
+      copy:
+        src: "{{ github_private_key_src }}"
+        dest: /home/ansible/.ssh/ansible_id_rsa
+        owner: ansible
+        group: ansible
+        mode: '0600'
+      when: not ansible_key_stat.stat.exists
+
     - name: Start SSH agent
       shell: |
         eval "$(ssh-agent -s)"
