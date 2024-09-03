@@ -1,0 +1,48 @@
+- name: Deploy Traefik
+  hosts: traefik
+  become: yes
+  tasks:
+    - name: Copy Traefik files to target server
+      copy:
+        src: "{{ playbook_dir }}/../homelab/apps/traefik/traefik/"
+        dest: /home/traefik-user/traefik/
+        owner: traefik-user
+        group: traefik-user
+        mode: '0755'
+        recurse: yes
+
+    - name: Copy update_traefik_secrets.sh script to target server
+      copy:
+        src: "{{ playbook_dir }}/../homelab/scripts/update_traefik_secrets.sh"
+        dest: /home/traefik-user/traefik/data/update_traefik_secrets.sh
+        owner: traefik-user
+        group: traefik-user
+        mode: '0755'
+
+    - name: Copy credentials to target server
+      copy:
+        src: "{{ playbook_dir }}/../credentials/apps/traefik/"
+        dest: /home/traefik-user/traefik/data/
+        owner: traefik-user
+        group: traefik-user
+        mode: '0600'
+        recurse: yes
+
+    - name: Set permissions on acme.json
+      file:
+        path: /home/traefik-user/traefik/data/acme.json
+        mode: '0600'
+      become: yes
+      become_user: root
+
+    - name: Run update_traefik_secrets.sh script
+      command: /home/traefik-user/traefik/data/update_traefik_secrets.sh
+      args:
+        chdir: /home/traefik-user/traefik
+
+    - name: Run docker-compose up with sudo
+      command: sudo docker-compose up -d --force-recreate
+      args:
+        chdir: /home/traefik-user/traefik
+      become: yes
+      become_user: root

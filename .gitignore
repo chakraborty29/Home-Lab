@@ -19,7 +19,6 @@ crash.log
 #
 *.pkrvars.hcl
 *.tfvars
-
 # Terraform
 # Local .terraform directories
 **/.terraform/*
