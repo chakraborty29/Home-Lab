@@ -37,6 +37,8 @@
       command: /home/traefik-user/traefik/data/update_traefik_secrets.sh
       args:
         chdir: /home/traefik-user/traefik
+      become: yes
+      become_user: root
 
     - name: Create docker network proxy with sudo
       command: sudo docker network create proxy
