@@ -1,7 +1,9 @@
-# playbooks/configure_builder_server.yml
+---
+# playbooks/update_repositories.yml
+
 - name: Configure Builder Server
   hosts: builders
-  become: yes
+  become: true
   vars_files:
     - ../vars/main.yml
   tasks:
@@ -16,8 +18,8 @@
         dest: /home/ansible/homelab
         version: develop
         key_file: /home/ansible/.ssh/github_rsa
-        accept_hostkey: yes
-        update: yes
+        accept_hostkey: true
+        update: true
 
     - name: Pull latest changes for credentials repository
       git:
@@ -25,5 +27,5 @@
         dest: /home/ansible/credentials
         version: develop
         key_file: /home/ansible/.ssh/github_rsa
-        accept_hostkey: yes
-        update: yes
+        accept_hostkey: true
+        update: true

@@ -1,7 +1,9 @@
+---
 # playbooks/configure_builder_server.yml
+
 - name: Configure Builder Server
   hosts: builders
-  become: yes
+  become: true
   vars_files:
     - ../vars/main.yml
   tasks:
@@ -37,7 +39,7 @@
       shell: |
         eval "$(ssh-agent -s)"
         ssh-add /home/ansible/.ssh/github_rsa
-      become: yes
+      become: true
       become_user: ansible
       when: not github_key_stat.stat.exists
 
@@ -52,8 +54,8 @@
         dest: /home/ansible/homelab
         version: develop
         key_file: /home/ansible/.ssh/github_rsa
-        accept_hostkey: yes
-        update: yes
+        accept_hostkey: true
+        update: true
 
     - name: Cloning credentials repository
       git:
@@ -61,8 +63,8 @@
         dest: /home/ansible/credentials
         version: develop
         key_file: /home/ansible/.ssh/github_rsa
-        accept_hostkey: yes
-        update: yes
+        accept_hostkey: true
+        update: true
 
     - name: Set ownership of credentials directory
       file:
@@ -70,7 +72,7 @@
         state: directory
         owner: ansible
         group: ansible
-        recurse: yes
+        recurse: true
 
     - name: Set ownership of homelab directory
       file:
@@ -78,7 +80,9 @@
         state: directory
         owner: ansible
         group: ansible
-        recurse: yes
-    
+        recurse: true
+
     - name: Copy Ansible inventory
-      command: cp /home/ansible/credentials/ansible/inventory /home/ansible/homelab/ansible/inventory
+      command: >
+        cp /home/ansible/credentials/ansible/inventory
+        /home/ansible/homelab/ansible/inventory
