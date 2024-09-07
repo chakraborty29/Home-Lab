@@ -10,14 +10,6 @@
         group: traefik-user
         mode: '0755'
 
-    - name: Copy update_traefik_secrets.sh script to target server
-      copy:
-        src: "~/homelab/scripts/update_traefik_secrets.sh"
-        dest: /home/traefik-user/traefik/data/update_traefik_secrets.sh
-        owner: traefik-user
-        group: traefik-user
-        # mode: '0755'
-
     - name: Copy credentials to target server
       copy:
         src: "~/credentials/apps/traefik/"
@@ -33,17 +25,17 @@
       become: yes
       become_user: root
 
-    - name: Set permissions on update_traefik_secrets.sh script
+    - name: Set permissions on secrets.sh script
       file:
-        path: /home/traefik-user/traefik/data/update_traefik_secrets.sh
+        path: /home/traefik-user/traefik/secrets.sh
         mode: '0755'
       become: yes
       become_user: root
 
-    - name: Run update_traefik_secrets.sh script
-      command: /home/traefik-user/traefik/data/update_traefik_secrets.sh
+    - name: Run secrets.sh script
+      command: /home/traefik-user/traefik/secrets.sh
       args:
-        chdir: /home/traefik-user/traefik/data/
+        chdir: /home/traefik-user/traefik/
       become: yes
       become_user: root
 
