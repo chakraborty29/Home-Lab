@@ -5,7 +5,7 @@
 # Define the secrets and config YAML files
 SECRETS_FILE="./data/secrets.yml"
 CONFIG_FILE="./data/config.yml"
-DOCKER_COMPOSE_FILE="docker-compose.yml"
+DOCKER_COMPOSE_FILE="./docker-compose.yml"
 
 # Function to extract a value from the YAML file
 extract_value() {
@@ -48,7 +48,8 @@ echo "Configuration updated in traefik.yml."
 
 sed -i -e "s|{CF_API_EMAIL}|$CF_API_EMAIL|g" \
        -e "s|{CF_API_KEY}|$CF_API_KEY|g" \
-       -e "s|{TRAEFIK_USER}|$TRAEFIK_USER|g" \
+       -e "s|{TRAEFIK_CREDS}|$TRAEFIK_CREDS|g" \
+       -e "s|{TRAEFIK_CREDS}|$TRAEFIK_CREDS|g" \
        -e "s|{TRAEFIK_DOMAIN}|$TRAEFIK_DOMAIN|g" \
        -e "s|{DEV_DOMAIN}|$DEV_DOMAIN|g" \
        "$DOCKER_COMPOSE_FILE"
