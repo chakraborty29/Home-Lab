@@ -4,7 +4,7 @@
   tasks:
     - name: Copy Traefik files to target server
       copy:
-        src: "~/homelab/apps/traefik/traefik/"
+        src: "~/homelab/apps/traefik/"
         dest: /home/traefik-user/traefik/
         owner: traefik-user
         group: traefik-user
