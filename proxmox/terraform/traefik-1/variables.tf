@@ -51,7 +51,7 @@ variable "ciuser" {
     type = string
 }
 
-variable "cipassword" {
-    type = string
-    sensitive = true
-}
+# variable "cipassword" {
+#     type = string
+#     sensitive = true
+# }
