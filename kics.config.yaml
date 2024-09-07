@@ -1,8 +1,0 @@
----
-
-type:
-  - Dockerfile
-include-queries:
-  - Dockerfile
-exclude-paths:
-  - "proxmox/packer/dev-hl-vm-template-service-01/files/99-pve.cf"
