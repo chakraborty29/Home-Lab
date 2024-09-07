@@ -3,9 +3,9 @@
 # source file
 # source .traefik-secrets.sh 
 # Define the secrets and config YAML files
-SECRETS_FILE="traefik_secrets.yml"
-CONFIG_FILE="config.yml"
-DOCKER_COMPOSE_FILE="../docker-compose.yml"
+SECRETS_FILE="./data/secrets.yml"
+CONFIG_FILE="./data/config.yml"
+DOCKER_COMPOSE_FILE="docker-compose.yml"
 
 # Function to extract a value from the YAML file
 extract_value() {
@@ -26,6 +26,7 @@ CF_API_KEY=$(extract_value "CF_API_KEY")
 TRAEFIK_USER=$(extract_value "TRAEFIK_USER")
 TRAEFIK_DOMAIN=$(extract_value "TRAEFIK_DOMAIN")
 TRAEFIK_PASS=$(extract_value "TRAEFIK_PASS")
+TRAEFIK_CREDS=$(extract_value "TRAEFIK_CREDS")
 DEV_DOMAIN=$(extract_value "DEV_DOMAIN")
 
 # Replace placeholders in the config file with the actual values in place

@@ -15,7 +15,7 @@ services:
       - 80:80
       - 443:443
     environment:
-      - CF_API_EMAIL=CF_API_EMAIL
+      - CF_API_EMAIL={CF_API_EMAIL}
       - CF_API_KEY={CF_API_KEY}
     volumes:
       - /etc/localtime:/etc/localtime:ro
@@ -27,7 +27,7 @@ services:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=http"
       - "traefik.http.routers.traefik.rule=Host(`{TRAEFIK_DOMAIN}`)"
-      - "traefik.http.middlewares.traefik-auth.basicauth.users=${TRAEFIK_CREDS}"
+      - "traefik.http.middlewares.traefik-auth.basicauth.users={TRAEFIK_CREDS}"
       - "traefik.http.middlewares.traefik-https-redirect.redirectscheme.scheme=https"
       - "traefik.http.middlewares.sslheader.headers.customrequestheaders.X-Forwarded-Proto=https"
       - "traefik.http.routers.traefik.middlewares=traefik-https-redirect"
