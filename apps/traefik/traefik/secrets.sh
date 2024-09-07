@@ -48,7 +48,7 @@ echo "Configuration updated in traefik.yml."
 
 sed -i -e "s|{CF_API_EMAIL}|$CF_API_EMAIL|g" \
        -e "s|{CF_API_KEY}|$CF_API_KEY|g" \
-       -e "s|{TRAEFIK_CREDS}|$TRAEFIK_CREDS|g" \
+       -e "s|{TRAEFIK_USER}|$TRAEFIK_USER|g" \
        -e "s|{TRAEFIK_CREDS}|$TRAEFIK_CREDS|g" \
        -e "s|{TRAEFIK_DOMAIN}|$TRAEFIK_DOMAIN|g" \
        -e "s|{DEV_DOMAIN}|$DEV_DOMAIN|g" \
