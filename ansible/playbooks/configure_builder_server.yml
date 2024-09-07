@@ -81,8 +81,4 @@
         recurse: yes
     
     - name: Copy Ansible inventory
-      copy:
-        src: /home/ansible/credentials/ansible/inventory
-        dest: /home/ansible/homelab/ansible/inventory
-        owner: ansible
-        group: ansible
+      command: cp /home/ansible/credentials/ansible/inventory /home/ansible/homelab/ansible/inventory
