@@ -1,3 +1,5 @@
+#!/bin/bash
+
 SECRETS_FILE="../vars/k3s.yml"
 
 extract_value() {
