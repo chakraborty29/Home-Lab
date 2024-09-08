@@ -17,6 +17,8 @@ Here are a few features I envision for my home lab:
 3. A VPN Service to ensure secure remote access into my network.
 4. Developing my own internal SSO Client to streamline authentication.
 
+### Current State Architecture
+![Alt Text](https://raw.githubusercontent.com/username/repository/develop/docs/src/current-state-archtecture.png)
 
 ## Getting Started
 
