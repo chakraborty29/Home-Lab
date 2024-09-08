@@ -37,7 +37,7 @@
 
     - name: Set permissions on k3s.sh script
       file:
-        path: "{ k3s_home }}/scripts/k3s.sh"
+        path: "{{ k3s_home }}/scripts/k3s.sh"
         mode: '0755'
       become: true
       become_user: root
