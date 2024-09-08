@@ -1,0 +1,50 @@
+- name: Configure Builder Server
+  hosts: builders
+  become: true
+  vars_files:
+    - ../vars/main.yml
+  tasks:
+    - name: Clone a k3s-ansible repository
+      git:
+        repo: "https://github.com/techno-tim/k3s-ansible.git"
+        dest: "{{ k3s_home }}"
+        version: master
+
+    - name: Install extra Ansible packages
+      command: >
+        ansible-galaxy collection install -r
+        {{ k3s_home }}/collections/requirements.yml
+
+    - name: Create new Ansible directory
+      command: >
+        cp -R {{ k3s_home }}/inventory/sample {{ k3s_home }}/inventory/my-cluster
+
+    - name: Copy K3s Host file
+      command: >
+        cp /home/ansible/credentials/k3s_inventory.ini {{ k3s_home }}/inventory/my-cluster/hosts.ini
+
+    - name: Copy K3s token secret
+      command: >
+        cp /home/ansible/credentials/k3s.yml {{ k3s_home }}/inventory/my-cluster/group_vars/all.yml
+
+    - name: Copy K3s Host
+      command: >
+        cp {{ k3s_home }}/ansible.example.cfg {{ k3s_home }}/ansible.cfg
+
+    - name: Copy K3s token script
+      command: >
+        cp /home/lab/homelab/ansible/scripts/k3s.sh {{ k3s_home }}/inventory/my-cluster/group_vars/k3s.sh
+
+    - name: Set permissions on k3s.sh script
+      file:
+        path: "{ k3s_home }}/scripts/k3s.sh"
+        mode: '0755'
+      become: true
+      become_user: root
+
+    - name: Run secrets.sh script
+      command: "{{ k3s_home }}/inventory/my-cluster/group_vars/k3s.sh"
+      args:
+        chdir: "{{ k3s_home }}/inventory/my-cluster/group_vars/"
+      become: true
+      become_user: root
