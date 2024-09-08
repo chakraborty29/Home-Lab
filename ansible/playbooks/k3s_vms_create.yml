@@ -8,12 +8,24 @@
   register: ping_result
   ignore_errors: true
 
-- name: Copy template files for VM if not alive
-  command: "cp -R {{ homelab_dir }}/templates/terraform-base-template {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
+- name: Copy config file for VM if not alive
+  copy:
+    src: "{{ homelab_dir }}/templates/terraform-base-template"
+    dest: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
+    owner: ansible
+    group: ansible
+    mode: '0755'
+    recurse: yes
   when: ping_result.rc != 0
 
 - name: Copy config file for VM if not alive
-  command: "cp {{ credentials_dir }}/k3s/{{ item }}.tfvars {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+  copy:
+    src: "{{ credentials_dir }}/k3s/{{ item }}.tfvars"
+    dest: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+    owner: ansible
+    group: ansible
+    mode: '0644'
+    recurse: yes
   when: ping_result.rc != 0
 
 - name: Build VM if target is not alive
