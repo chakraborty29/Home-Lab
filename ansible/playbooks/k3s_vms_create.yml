@@ -1,66 +1,23 @@
 ---
-- name: Create K3s VMs
-  hosts: builders
-  become: true
-  vars_files:
-    - ../vars/main.yml
-  tasks:
-    - name: Create each master
-      with_items: "{{ groups['master'] }}"
-      tasks:
-        - name: Get target IP from inventory
-          set_fact:
-            target_ip: "{{ hostvars[item].ansible_host }}"
+- name: Get target IP from inventory
+  set_fact:
+    target_ip: "{{ hostvars[item].ansible_host }}"
 
-        - name: Ping the target IP
-          shell: ping -c 1 -W {{ target_ip }}
-          register: ping_result
-          ignore_errors: true
+- name: Ping the target IP
+  shell: "ping -c 1 -W 1 {{ target_ip }}"
+  register: ping_result
+  ignore_errors: true
 
-        - name: Copy template files for vm if not alive
-          command: "cp -R {{ homelab_dir }}/templates/terraform-base-template {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
-          when: ping_result.rc != 0
+- name: Copy template files for VM if not alive
+  command: "cp -R {{ homelab_dir }}/templates/terraform-base-template {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
+  when: ping_result.rc != 0
 
-        - name: Copy config file for vm if not alive
-          command: "cp {{ credentials_dir }}/k3s/{{ item }}.tfvars {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
-          when: ping_result.rc != 0
+- name: Copy config file for VM if not alive
+  command: "cp {{ credentials_dir }}/k3s/{{ item }}.tfvars {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+  when: ping_result.rc != 0
 
-        - name: Build vm if target is not alive
-          command: "terraform apply -auto-approve {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
-          args:
-            chdir: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/"
-          when: ping_result.rc != 0
-
-    - name: Create each node
-      with_items: "{{ groups['node'] }}"
-      tasks:
-        - name: Get target IP from inventory
-          set_fact:
-            target_ip: "{{ hostvars[item].ansible_host }}"
-
-        - name: Ping the target IP
-          shell: ping -c 1 -W {{ target_ip }}
-          register: ping_result
-          ignore_errors: true
-
-        - name: Copy template files for vm if not alive
-          command: "cp -R {{ homelab_dir }}/templates/terraform-base-template {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
-          when: ping_result.rc != 0
-
-        - name: Copy config file for vm if not alive
-          command: "cp {{ credentials_dir }}/k3s/{{ item }}.tfvars {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
-          when: ping_result.rc != 0
-
-        - name: Build vm if target is not alive
-          command: "terraform apply -auto-approve {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
-          args:
-            chdir: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/"
-          when: ping_result.rc != 0
-
-    - name: Pip install netaddr
-      hosts: master
-      gather_facts: yes
-      tasks:
-        - name: Install netaddr package
-          pip:
-            name: netaddr
+- name: Build VM if target is not alive
+  command: "terraform apply -auto-approve {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+  args:
+    chdir: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/"
+  when: ping_result.rc != 0

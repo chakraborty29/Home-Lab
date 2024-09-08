@@ -1,0 +1,17 @@
+- name: Destroy K3s Servers
+  hosts: builders
+  become: true
+  vars_files:
+    - ../vars/main.yml
+  tasks:
+    - name: Create each master
+      include_tasks: k3s_vms_destroy.yml
+      loop: "{{ groups['master'] }}"
+      loop_control:
+        loop_var: item
+
+    - name: Create each node
+      include_tasks: k3s_vms_destroy.yml
+      loop: "{{ groups['node'] }}"
+      loop_control:
+        loop_var: item

@@ -1,4 +1,4 @@
-- name: Configure Builder Server
+- name: Deploy K3s
   hosts: builders
   become: true
   vars_files:
@@ -48,6 +48,31 @@
 
     - name: Run secrets.sh script
       command: "{{ k3s_home }}/inventory/my-cluster/group_vars/k3s.sh"
+      args:
+        chdir: "{{ k3s_home }}/inventory/my-cluster/group_vars/"
+      become: true
+      become_user: root
+
+    - name: Create each master
+      include_tasks: k3s_vms_create.yml
+      loop: "{{ groups['master'] }}"
+      loop_control:
+        loop_var: item
+
+    - name: Create each node
+      include_tasks: k3s_vms_create.yml
+      loop: "{{ groups['node'] }}"
+      loop_control:
+        loop_var: item
+
+    - name: Pip install netaddr
+      hosts: master
+      gather_facts: yes
+      pip:
+        name: netaddr
+
+    - name: Deploy K3s
+      command: "ansible-playbook {{ k3s_home }}/site.yml -i {{ k3s_home }}/inventory/my-cluster/hosts.ini"
       args:
         chdir: "{{ k3s_home }}/inventory/my-cluster/group_vars/"
       become: true
