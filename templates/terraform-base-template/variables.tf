@@ -48,11 +48,11 @@ variable "ipconfig0" {
     type = string
 }
 
-variable "ciuser" {
-    type = string
-}
+# variable "ciuser" {
+#     type = string
+# }
 
-variable "cipassword" {
-    type = string
-    sensitive = true
-}
+# variable "cipassword" {
+#     type = string
+#     sensitive = true
+# }
