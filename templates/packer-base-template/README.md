@@ -1,43 +1,14 @@
-# Automating Proxmox VM Creation with Packer Scripts
+# Automating Proxmox Image Tempalte Creation with Packer Scripts
 
-### Essential Configuration mandatory across all environments
-```
-packer {
-  required_plugins {
-    name = {
-      version = "1.1.8"
-      source  = "github.com/hashicorp/proxmox"
-    }
-  }
-}
-```
+
 ### Essential Configuration for Development Environment Testing
-For development environments or when operating behind a corporate proxy, consider the following settings:
+For development environments, consider the following settings:
 ```
 source "proxmox-iso" "vm-template" {
     ...
 
     // (Optional) Bypass TLS Verification
     insecure_skip_tls_verify = true
-
-    ...
-}
-```
-
-### Essential Configuration for proxmox-iso builder
-Ensure the disk format is set to `raw` when utilizing a local ISO image from Proxmox. The `storage_pool_type` is deprecated and should be omitted:
-
-```
-source "proxmox-iso" "vm-template" {
-    ...
-
-    disks {
-        disk_size = "20G"
-        format = "raw"
-        storage_pool = "local-lvm"
-        // storage_pool_type = "lvmthin"
-        type = "virtio"
-    }
 
     ...
 }
@@ -108,8 +79,6 @@ To remove the port forwarding after use:
 netsh interface portproxy delete v4tov4 listenport=8802 listenaddress=0.0.0.0
 ```
 
-I have not yet found a secure solution for this.
-
 ### Example  vars.pkvars.hcl file:
 ```
 env = "dev"
@@ -118,14 +87,14 @@ proxmox_api_token_id = ""  # API Token ID
 proxmox_api_token_secret = ""
 proxmox_iso_file = "local:iso/ubuntu-20.04.6-live-server-amd64.iso"
 proxmox_node = "dev-pve-01"
-vm_name = ""
+vm_name = "base-template"
 agent = "1"
 cores = "1"
 memory = "2048"
 http_bind_address = ""
 http_bind_port = ""
-ssh_username = ""
-ssh_private_key_file = "./files/ssh/id_rsa"
+ssh_username = "cloudinit-admin"
+ssh_private_key_file = "./files/ssh/cloudinit_id_rsa"
 ```
 
 All that is left to do:

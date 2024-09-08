@@ -12,28 +12,68 @@ Two years on, I've finally had the chance to dive back in. My toolkit now includ
 
 Here are a few features I envision for my home lab:
 
-1. A Firewall to secure my network.
-2. A VPN Service to ensure secure remote access and secure internet surfing.
-3. A Kubernetes Cluster to run my applications.
-4. A Jenkins setup for CI/CD processes (potentially integrated within Kubernetes).
-5. **In the future:** developing my own internal SSO Client to streamline authentication.
+1. A Kubernetes Cluster to run my applications.
+2. A Jenkins setup for CI/CD processes (potentially integrated within Kubernetes).
+3. A VPN Service to ensure secure remote access into my network.
+4. Developing my own internal SSO Client to streamline authentication.
 
+
+## Getting Started
+
+
+### Prerequisites
+Before initiating the build process, ensure the following prerequisites are met:
+* Proxmox Node(s) are set up and operational.
+* Ubuntu ISO is uploaded to the Proxmox Node(s).
+* Proxmox API Token is created (Docmentation will be updated to include this step).
+* Packer & Terraform are installed on the host machine.
+
+### Building a Packer Image Template
+1. Copy `template/packer-base-template` directory.
+2. Navigate to the `files/ssh` directory and generate SSH keys for the cloudinit-admin user:
+```bash
+ssh-keygen -t rsa -b 4096 -C "cloudinit-admin" -f ./cloudinit_id_rsa
+```
+3. Rename `vars.hcl` to `vars.pkvars.hcl` and update it with your specific variables. Please refer to the [README.md](https://github.com/chakraborty29/Home-Lab/tree/develop/templates/packer-base-template) in the `templates/packer-base-template` directory about detailed information on the bind_address variable as it is critical for your Proxmox and Host machines to communicate for `cloud-init`.
+5. Validate the Packer configuration:
+```bash
+packer validate -var-file='./vars.pkrvars.hcl' ./template.pkr.hcl
+```
+6. Build the Packer image template:
+```bash
+packer build -var-file='./vars.pkrvars.hcl' ./template.pkr.hcl
+```
+
+### Deploying a VM with Terraform
+Once you built the image template with Packer, you can now clone that template and build VMs really quickly.
+1. Copy `template/terraform-base-template` directory.
+2. Update the variables in `credentials.tfvars` according to your requirements. You can omit the `ipconfig0` variable if you want DHCP to take care of the ip address assignment.
+3. Plan the Terraform deployment:
+```bash
+terraform plan -var-file='./credentials.tfvars'
+```
+4. Apply the Terraform configurations:
+```bash
+terraform apply -var-file='./credentials.tfvars'
+```
+6. To remove the deployed infrastructure, use Terraform destroy:
+```bash
+terraform destroy -var-file='./credentials.tfvars'
+```
 
 ## Integration of [pre-commit](https://pre-commit.com/) Framework for Enhanced DevSecOps Practices
 ### Purpose
-Infrastructure as Code (IaC) repositories are inherently sensitive due to the presence of **secrets** and configuration files in formats such as `.yaml`. They often interact with a variety of IaC tools, including but not limited to `Terraform`, `Packer`, `Kubernetes`, and `Docker`. The primary objective is to safeguard these secrets and prevent the deployment of insecure infrastructure by adhering to robust DevSecOps practices.
+Infrastructure as Code (IaC) repositories are inherently sensitive due to the presence of **secrets** and configuration files in formats such as `.yml`. They often interact with a variety of IaC tools, including but not limited to `Terraform`, `Packer`, `Kubernetes`, and `Docker`. The primary objective is to safeguard these secrets and prevent the deployment of insecure infrastructure by adhering to robust DevSecOps practices.
 
 ### What is [pre-commit](https://pre-commit.com/)?
 [pre-commit](https://pre-commit.com/) is a framework that utilizes Git hooks to perform checks on code prior to submission for code review. It is instrumental in detecting potential issues such as exposed secrets, improper file formats, and vulnerabilities within IaC.
 
 ### Installed Hooks
-1. **[yamlint](https://github.com/adrienverge/yamllint)**: Enforces best practices and linting for `.yaml` files.
-2. **[gitleaks](https://github.com/gitleaks/gitleaks)**: Scans for exposed secrets within the codebase.
-3. **[KICS](https://kics.io/)**: Identifies security vulnerabilities in IaC.
+1. **[yamlint](https://github.com/adrienverge/yamllint)**: Enforces best practices and linting for `.yml` files.
+2. **[gitguardian](https://github.com/gitguardian/ggshield)**: Scans for exposed secrets within the codebase.
 
 ### System Requirements:
 1. **[Python3](https://wiki.python.org/moin/BeginnersGuide/Download)**: Required for running pre-commit and associated hooks.
-2. **[Docker](https://docs.docker.com/engine/install/)**: Necessary for containerization and executing certain hooks.
 
 ### Installation
 
