@@ -21,7 +21,7 @@
 
     - name: Copy K3s Host file
       command: >
-        cp /home/ansible/credentials/k3s_inventory.ini {{ k3s_home }}/inventory/my-cluster/hosts.ini
+        cp /home/ansible/credentials/k3s_inventory {{ k3s_home }}/inventory/my-cluster/hosts.ini
 
     - name: Copy K3s token secret
       command: >
