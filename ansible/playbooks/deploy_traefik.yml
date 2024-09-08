@@ -1,0 +1,64 @@
+---
+# playbooks/deploy_traefik.yml
+
+- name: Deploy Traefik
+  hosts: traefik
+  become: true
+  tasks:
+    - name: Copy Traefik files to target server
+      copy:
+        src: "~/homelab/apps/traefik/"
+        dest: /home/traefik-user/traefik/
+        owner: traefik-user
+        group: traefik-user
+        mode: '0755'
+
+    - name: Copy credentials to target server
+      copy:
+        src: "~/credentials/apps/traefik/"
+        dest: /home/traefik-user/traefik/data/
+        owner: traefik-user
+        group: traefik-user
+        # mode: '0600'
+
+    - name: Set permissions on acme.json
+      file:
+        path: /home/traefik-user/traefik/data/acme.json
+        mode: '0600'
+      become: true
+      become_user: root
+
+    - name: Set permissions on secrets.sh script
+      file:
+        path: /home/traefik-user/traefik/secrets.sh
+        mode: '0755'
+      become: true
+      become_user: root
+
+    - name: Run secrets.sh script
+      command: /home/traefik-user/traefik/secrets.sh
+      args:
+        chdir: /home/traefik-user/traefik/
+      become: true
+      become_user: root
+
+    - name: Create docker network proxy with sudo
+      command: sudo docker network create proxy
+      become: true
+      become_user: root
+      ignore_errors: true
+      register: docker_network_error
+
+    - name: Display error message if the previous task failed
+      debug:
+        msg: >
+          "The task failed with the following error:
+          {{ docker_network_error.stderr }}"
+      when: docker_network_error.failed
+
+    - name: Run docker-compose up with sudo
+      command: sudo docker-compose up -d --force-recreate
+      args:
+        chdir: /home/traefik-user/traefik
+      become: true
+      become_user: root
