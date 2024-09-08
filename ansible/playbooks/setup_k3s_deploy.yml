@@ -25,7 +25,7 @@
 
     - name: Copy K3s token secret
       command: >
-        cp /home/ansible/credentials/ansible/k3s.yml {{ k3s_home }}/inventory/my-cluster/group_vars/all.yml
+        cp /home/ansible/credentials/ansible/vars/k3s.yml {{ k3s_home }}/inventory/my-cluster/group_vars/all.yml
 
     - name: Copy K3s Host
       command: >
