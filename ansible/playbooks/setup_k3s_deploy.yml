@@ -33,7 +33,7 @@
 
     - name: Copy K3s token script
       command: >
-        cp /home/lab/homelab/ansible/scripts/k3s.sh {{ k3s_home }}/inventory/my-cluster/group_vars/k3s.sh
+        cp /home/ansible/homelab/ansible/scripts/k3s.sh {{ k3s_home }}/inventory/my-cluster/group_vars/k3s.sh
 
     - name: Set permissions on k3s.sh script
       file:
