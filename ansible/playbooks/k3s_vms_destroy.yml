@@ -9,7 +9,7 @@
   ignore_errors: true
 
 - name: Build VM if target is alive
-  command: "terraform destroy -auto-approve {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+  command: "terraform destroy -var-file='{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'"
   args:
     chdir: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/"
   when: ping_result.rc == 0
