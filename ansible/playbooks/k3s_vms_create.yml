@@ -9,7 +9,7 @@
   ignore_errors: true
 
 - name: Make VM dir for VM if not alive
-  command: "mkdir {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
+  command: "mkdir {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/"
   when: ping_result.rc != 0
 
 - name: Copy template files for VM if not alive
