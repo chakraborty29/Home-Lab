@@ -29,7 +29,7 @@
   when: ping_result.rc != 0
 
 - name: Build VM if target is not alive
-  command: "terraform apply -auto-approve {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+  command: "terraform apply -auto-approve -var-file='{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'"
   args:
     chdir: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/"
   when: ping_result.rc != 0
