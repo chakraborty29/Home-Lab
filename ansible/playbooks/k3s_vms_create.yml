@@ -8,20 +8,24 @@
   register: ping_result
   ignore_errors: true
 
-- name: Make k3s dir for VM if not alive
-  command: "mkdir {{ homelab_dir }}/proxmox/terraform/k3s"
-  when: ping_result.rc != 0
-
-- name: Make VM dir for VM if not alive
-  command: "mkdir {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
-  when: ping_result.rc != 0
-
 - name: Copy template files for VM if not alive
-  command: "cp -R {{ homelab_dir }}/templates/terraform-base-template {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
-  when: ping_result.rc != 0
+  synchronize:
+    src: "{{ homelab_dir }}/templates/terraform-base-template/"
+    dest: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
+    mode: push
+
+# - name: Copy template files for VM if not alive
+#   command: "cp -R {{ homelab_dir }}/templates/terraform-base-template {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
+#   when: ping_result.rc != 0
 
 - name: Copy config file for VM if not alive
   command: "cp {{ credentials_dir }}/k3s/{{ item }}.tfvars {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+  when: ping_result.rc != 0
+
+- name: Initiate Terraform
+  command: "terraform init"
+  args:
+    chdir: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/"
   when: ping_result.rc != 0
 
 - name: Build VM if target is not alive
