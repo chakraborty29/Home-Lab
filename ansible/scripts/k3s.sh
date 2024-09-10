@@ -9,4 +9,4 @@ extract_value() {
 
 K3S_TOKEN=$(extract_value "K3S_TOKEN")
 
-sed -i -e "s|{k3_token}|$K3S_TOKEN|g" /home/ansible/homelab/k3s-ansible/inventory/my-cluster/group_vars/all.yml
+sed -i -e "s|{k3_token}|$K3S_TOKEN|g" /home/ansible/k3s-ansible/inventory/my-cluster/group_vars/all.yml
