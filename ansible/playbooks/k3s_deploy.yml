@@ -65,9 +65,9 @@
       loop_control:
         loop_var: item
 
-    - name: Deploy K3s
-      command: "ansible-playbook {{ k3s_home }}/site.yml -i {{ k3s_home }}/inventory/my-cluster/hosts.ini"
-      args:
-        chdir: "{{ k3s_home }}/inventory/my-cluster/group_vars/"
-      become: true
-      become_user: root
+    # - name: Deploy K3s
+    #   command: "ansible-playbook {{ k3s_home }}/site.yml -i {{ k3s_home }}/inventory/my-cluster/hosts.ini"
+    #   args:
+    #     chdir: "{{ k3s_home }}/inventory/my-cluster/group_vars/"
+    #   become: true
+    #   become_user: root

@@ -10,8 +10,8 @@
 
 - name: Copy template files for VM if not alive
   synchronize:
-    src: "{{ homelab_dir }}/templates/terraform-base-template/"
-    dest: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
+    src: "{{ terraform_dir }}/templates/terraform-base-template/"
+    dest: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}"
     mode: push
 
 # - name: Copy template files for VM if not alive
@@ -19,17 +19,17 @@
 #   when: ping_result.rc != 0
 
 - name: Copy config file for VM if not alive
-  command: "cp {{ credentials_dir }}/k3s/{{ item }}.tfvars {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+  command: "cp {{ credentials_dir }}/k3s/{{ item }}.tfvars {{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
   when: ping_result.rc != 0
 
 - name: Initiate Terraform
   command: "terraform init"
   args:
-    chdir: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/"
+    chdir: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/"
   when: ping_result.rc != 0
 
 - name: Build VM if target is not alive
-  command: "terraform apply -auto-approve -var-file='{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'"
+  command: "terraform apply -auto-approve -var-file='{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'"
   args:
-    chdir: "{{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}/"
+    chdir: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/"
   when: ping_result.rc != 0
