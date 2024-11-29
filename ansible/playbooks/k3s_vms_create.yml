@@ -3,58 +3,41 @@
   hosts: localhost
   gather_facts: false
   tasks:
-    - name: Get target IP from inventory
-      ansible.builtin.set_fact:
-        target_ip: "{{ hostvars[item].ansible_host }}"
+    - name: Create terraform directories and copy templates
+      block:
+        - name: Create terraform directories
+          ansible.builtin.file:
+            path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
+            state: directory
+            mode: '0755'
+          loop: "{{ groups['master'] + groups['node'] }}"
 
-    - name: Check if host is available
-      ansible.builtin.wait_for:
-        host: "{{ target_ip }}"
-        port: 22
-        timeout: 1
-        state: stopped
-      register: host_check
-      ignore_errors: true
+        - name: Copy terraform templates
+          ansible.builtin.synchronize:
+            src: "{{ paths.terraform }}/templates/terraform-base-template/"
+            dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
+            mode: push
+          loop: "{{ groups['master'] + groups['node'] }}"
 
-    - name: Create terraform working directory
-      ansible.builtin.file:
-        path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
-        state: directory
-        mode: '0755'
-      when: host_check.failed
+        - name: Copy tfvars files
+          ansible.builtin.copy:
+            src: "{{ paths.credentials }}/k3s/{{ item }}.tfvars"
+            dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+            mode: '0644'
+          loop: "{{ groups['master'] + groups['node'] }}"
 
-    - name: Copy template files for VM if not alive
-      ansible.builtin.synchronize:
-        src: "{{ paths.terraform }}/templates/terraform-base-template/"
-        dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
-        mode: push
-      when: host_check.failed
+    - name: Initialize and apply terraform
+      block:
+        - name: Initialize terraform
+          ansible.builtin.command: terraform init
+          args:
+            chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+          loop: "{{ groups['master'] + groups['node'] }}"
 
-    - name: Copy config file for VM if not alive
-      ansible.builtin.copy:
-        src: "{{ paths.credentials }}/k3s/{{ item }}.tfvars"
-        dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
-        mode: '0644'
-      when: host_check.failed
-
-    - name: Initialize Terraform
-      ansible.builtin.command: terraform init
-      args:
-        chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
-      when: host_check.failed
-
-    - name: Build VM if target is not alive
-      ansible.builtin.command: >
-        terraform apply -auto-approve 
-        -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
-      args:
-        chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
-      when: host_check.failed
-      register: terraform_apply
-
-    - name: Wait for VM to be ready
-      ansible.builtin.wait_for:
-        host: "{{ target_ip }}"
-        port: 22
-        timeout: 300
-      when: host_check.failed
+        - name: Create VMs
+          ansible.builtin.command: >
+            terraform apply -auto-approve 
+            -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
+          args:
+            chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+          loop: "{{ groups['master'] + groups['node'] }}"
