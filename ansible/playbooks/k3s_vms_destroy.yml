@@ -1,29 +1,48 @@
 ---
-- name: Get target IP from inventory
-  ansible.builtin.set_fact:
-    target_ip: "{{ hostvars[item].ansible_host }}"
+- name: Destroy K3s VMs
+  hosts: localhost
+  gather_facts: false
+  vars_files:
+    - "../group_vars/all.yml"  # Include the variables from all.yml
+  vars:
+    target_vm: ""  # Can be set via --extra-vars "target_vm=k3s-master-1"
+  tasks:
+    - name: Set VM list
+      set_fact:
+        vm_list: "{{ [target_vm] if target_vm != '' else (groups['master'] + groups['node']) }}"
 
-- name: Check if host is available
-  ansible.builtin.wait_for:
-    host: "{{ target_ip }}"
-    port: 22
-    timeout: 1
-  register: host_check
-  ignore_errors: true
+    - name: Destroy VMs
+      block:
+        - name: Check if host is available
+          ansible.builtin.wait_for:
+            host: "{{ hostvars[item].ansible_host }}"
+            port: 22
+            timeout: 1
+          register: host_check
+          ignore_errors: true
+          loop: "{{ vm_list }}"
 
-- name: Destroy VM if target is alive
-  ansible.builtin.command: >
-    terraform destroy -auto-approve 
-    -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
-  args:
-    chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
-  when: host_check is success
-  register: terraform_destroy
+        - name: Destroy VM if target is alive
+          ansible.builtin.command: >
+            terraform destroy -auto-approve 
+            -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
+          args:
+            chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+          when: "host_check.results[vm_list.index(item)].failed == false"
+          loop: "{{ vm_list }}"
+          register: terraform_destroy
 
-- name: Wait for VM to be completely destroyed
-  ansible.builtin.wait_for:
-    host: "{{ target_ip }}"
-    port: 22
-    timeout: 300
-    state: stopped
-  when: terraform_destroy is success
+        - name: Wait for VMs to be completely destroyed
+          ansible.builtin.wait_for:
+            host: "{{ hostvars[item].ansible_host }}"
+            port: 22
+            timeout: 300
+            state: stopped
+          when: "terraform_destroy.results[vm_list.index(item)].changed | default(false)"
+          loop: "{{ vm_list }}"
+
+        # - name: Clean up terraform directories
+        #   ansible.builtin.file:
+        #     path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
+        #     state: absent
+        #   loop: "{{ vm_list }}"
