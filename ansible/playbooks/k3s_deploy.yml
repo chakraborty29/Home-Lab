@@ -17,14 +17,6 @@
           - paths.credentials is defined
         fail_msg: "Required variables are not defined"
 
-    - name: Wait for VMs to be ready
-      ansible.builtin.wait_for:
-        host: "{{ hostvars[item].ansible_host }}"
-        port: 22
-        timeout: 300
-      loop: "{{ groups['master'] + groups['node'] }}"
-      ignore_errors: true
-
   tasks:
     - name: Install extra Ansible packages
       ansible.builtin.command: >
@@ -57,22 +49,35 @@
       vars:
         k3s_token: "{{ k3s_secrets.k3s_token }}"
 
-    - name: Create each master
+    - name: Create master nodes
       ansible.builtin.include_tasks: k3s_vms_create.yml
       loop: "{{ groups['master'] }}"
       loop_control:
         loop_var: item
+      register: master_creation
 
-    - name: Create each node
+    - name: Create worker nodes
       ansible.builtin.include_tasks: k3s_vms_create.yml
       loop: "{{ groups['node'] }}"
       loop_control:
         loop_var: item
+      register: worker_creation
 
-    # Uncomment when ready to deploy k3s
-    # - name: Deploy K3s cluster
-    #   ansible.builtin.command: "ansible-playbook site.yml -i inventory/my-cluster/hosts.ini"
-    #   args:
-    #     chdir: "{{ paths.k3s }}"
-    #   register: k3s_deploy
-    #   changed_when: k3s_deploy.rc == 0
+    - name: Wait for all nodes to be ready
+      ansible.builtin.wait_for:
+        host: "{{ hostvars[item].ansible_host }}"
+        port: 22
+        timeout: 300
+      loop: "{{ groups['master'] + groups['node'] }}"
+      when: (master_creation is success) and (worker_creation is success)
+      register: nodes_ready
+
+    - name: Deploy K3s cluster
+      ansible.builtin.command: "ansible-playbook site.yml -i inventory/my-cluster/hosts.ini"
+      args:
+        chdir: "{{ paths.k3s }}"
+      register: k3s_deploy
+      changed_when: k3s_deploy.rc == 0
+      when: (master_creation is success) and 
+            (worker_creation is success) and
+            (nodes_ready is success)

@@ -1,43 +1,25 @@
 ---
-- name: Destroy K3s VMs
-  hosts: localhost
-  gather_facts: false
-  vars_files:
-    - "../group_vars/all.yml"
-  vars:
-    target_vm: ""  # Can be set via --extra-vars "target_vm=k3s-master-1"
+- name: Check if VM is available
+  ansible.builtin.wait_for:
+    host: "{{ item }}"
+    port: 22
+    timeout: 1
+  register: host_check
+  ignore_errors: true
 
-  tasks:
-    - name: Set VM list
-      set_fact:
-        vm_list: "{{ [target_vm] if target_vm != '' else (groups['master'] + groups['node']) }}"
+- name: Destroy VM
+  ansible.builtin.command: >
+    terraform destroy -auto-approve 
+    -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
+  args:
+    chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+  when: "host_check.failed == false"
+  register: terraform_destroy
 
-    - name: Destroy VMs
-      block:
-        - name: Check if VM is available
-          ansible.builtin.wait_for:
-            host: "{{ hostvars[item].ansible_host }}"
-            port: 22
-            timeout: 1
-          register: host_check
-          ignore_errors: true
-          loop: "{{ vm_list }}"
-
-        - name: Destroy VM if available
-          ansible.builtin.command: >
-            terraform destroy -auto-approve 
-            -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
-          args:
-            chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
-          when: "host_check.results[vm_list.index(item)].failed == false"
-          loop: "{{ vm_list }}"
-          register: terraform_destroy
-
-        - name: Wait for VM to be fully destroyed
-          ansible.builtin.wait_for:
-            host: "{{ hostvars[item].ansible_host }}"
-            port: 22
-            timeout: 300
-            state: stopped
-          when: "terraform_destroy.results[vm_list.index(item)].changed | default(false)"
-          loop: "{{ vm_list }}"
+- name: Wait for VM to be fully destroyed
+  ansible.builtin.wait_for:
+    host: "{{ item }}"
+    port: 22
+    timeout: 300
+    state: stopped
+  when: "terraform_destroy.changed | default(false)"
