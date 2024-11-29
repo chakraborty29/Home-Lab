@@ -1,0 +1,13 @@
+---
+traefik:
+  user: "traefik-user"
+  home: "/home/traefik-user/traefik"
+  docker:
+    network: "proxy"
+  files:
+    acme: "{{ traefik.home }}/data/acme.json"
+    secrets: "{{ traefik.home }}/data/secrets.yml"
+  permissions:
+    config: "0755"
+    acme: "0600"
+    secrets: "0755"
