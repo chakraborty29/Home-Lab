@@ -2,6 +2,8 @@
 - name: Create K3s VMs
   hosts: localhost
   gather_facts: false
+  vars_files:
+    - "../group_vars/all.yml"  # Include the variables from all.yml
   vars:
     target_vm: ""  # Can be set via --extra-vars "target_vm=k3s-master-1"
   tasks:
