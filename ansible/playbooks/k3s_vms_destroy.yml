@@ -6,6 +6,7 @@
     - "../group_vars/all.yml"  # Include the variables from all.yml
   vars:
     target_vm: ""  # Can be set via --extra-vars "target_vm=k3s-master-1"
+  
   tasks:
     - name: Set VM list
       set_fact:
