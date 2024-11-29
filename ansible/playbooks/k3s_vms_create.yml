@@ -2,42 +2,50 @@
 - name: Create K3s VMs
   hosts: localhost
   gather_facts: false
+  vars:
+    target_vm: ""  # Can be set via --extra-vars "target_vm=k3s-master-1"
   tasks:
-    - name: Create terraform directories and copy templates
+    - name: Set VM list
+      set_fact:
+        vm_list: "{{ [target_vm] if target_vm != '' else (groups['master'] + groups['node']) }}"
+
+    - name: Initialize terraform environment
       block:
         - name: Create terraform directories
           ansible.builtin.file:
             path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
             state: directory
             mode: '0755'
-          loop: "{{ groups['master'] + groups['node'] }}"
+          loop: "{{ vm_list }}"
+          when: target_vm == ''  # Only during init
 
         - name: Copy terraform templates
           ansible.builtin.synchronize:
             src: "{{ paths.homelab }}/templates/terraform-base-template/"
             dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
             mode: push
-          loop: "{{ groups['master'] + groups['node'] }}"
+          loop: "{{ vm_list }}"
+          when: target_vm == ''  # Only during init
 
         - name: Copy tfvars files
           ansible.builtin.copy:
             src: "{{ paths.credentials }}/k3s/{{ item }}.tfvars"
             dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
             mode: '0644'
-          loop: "{{ groups['master'] + groups['node'] }}"
+          loop: "{{ vm_list }}"
+          when: target_vm == ''  # Only during init
 
-    - name: Initialize and apply terraform
-      block:
         - name: Initialize terraform
           ansible.builtin.command: terraform init
           args:
             chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
-          loop: "{{ groups['master'] + groups['node'] }}"
+          loop: "{{ vm_list }}"
+          when: target_vm == ''  # Only during init
 
-        - name: Create VMs
-          ansible.builtin.command: >
-            terraform apply -auto-approve 
-            -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
-          args:
-            chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
-          loop: "{{ groups['master'] + groups['node'] }}"
+    - name: Create/Update VMs
+      ansible.builtin.command: >
+        terraform apply -auto-approve 
+        -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
+      args:
+        chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+      loop: "{{ vm_list }}"
