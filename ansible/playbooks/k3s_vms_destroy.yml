@@ -3,10 +3,16 @@
   hosts: localhost
   gather_facts: false
   vars_files:
-    - "../group_vars/all.yml"  # Include the variables from all.yml
+    - "../group_vars/all.yml"
   vars:
     target_vm: ""  # Can be set via --extra-vars "target_vm=k3s-master-1"
-  
+    inventory_file: "{{ paths.homelab }}/ansible/inventory"
+
+  pre_tasks:
+    - name: Include inventory file
+      ansible.builtin.include_vars:
+        file: "{{ inventory_file }}"
+
   tasks:
     - name: Set VM list
       set_fact:
@@ -41,9 +47,3 @@
             state: stopped
           when: "terraform_destroy.results[vm_list.index(item)].changed | default(false)"
           loop: "{{ vm_list }}"
-
-        # - name: Clean up terraform directories
-        #   ansible.builtin.file:
-        #     path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
-        #     state: absent
-        #   loop: "{{ vm_list }}"
