@@ -1,17 +1,39 @@
 - name: Destroy K3s Servers
   hosts: builders
   become: true
-  vars_files:
-    - ../vars/main.yml
+  
+  pre_tasks:
+    - name: Verify required variables are defined
+      assert:
+        that:
+          - paths.terraform is defined
+          - paths.credentials is defined
+        fail_msg: "Required variables are not defined"
+  
+    - name: Check terraform directories exist
+      ansible.builtin.stat:
+        path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
+      register: terraform_dirs
+      loop: "{{ groups['master'] + groups['node'] }}"
+  
   tasks:
-    - name: Create each master
-      include_tasks: k3s_vms_destroy.yml
+    - name: Destroy master nodes
+      ansible.builtin.include_tasks: k3s_vms_destroy.yml
       loop: "{{ groups['master'] }}"
       loop_control:
         loop_var: item
+      when: terraform_dirs.results | selectattr('item', 'equalto', item) | map(attribute='stat.exists') | first
 
-    - name: Create each node
-      include_tasks: k3s_vms_destroy.yml
+    - name: Destroy worker nodes
+      ansible.builtin.include_tasks: k3s_vms_destroy.yml
       loop: "{{ groups['node'] }}"
       loop_control:
         loop_var: item
+      when: terraform_dirs.results | selectattr('item', 'equalto', item) | map(attribute='stat.exists') | first
+
+    - name: Clean up terraform directories
+      ansible.builtin.file:
+        path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
+        state: absent
+      loop: "{{ groups['master'] + groups['node'] }}"
+      when: terraform_dirs.results | selectattr('item', 'equalto', item) | map(attribute='stat.exists') | first

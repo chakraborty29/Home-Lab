@@ -4,61 +4,58 @@
 - name: Deploy Traefik
   hosts: traefik
   become: true
+  
+  pre_tasks:
+    - name: Include traefik secrets
+      include_vars:
+        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.traefik.secrets }}"
+        name: traefik_secrets
+
   tasks:
     - name: Copy Traefik files to target server
-      copy:
-        src: "~/homelab/apps/traefik/"
-        dest: /home/traefik-user/traefik/
-        owner: traefik-user
-        group: traefik-user
-        mode: '0755'
+      ansible.builtin.copy:
+        src: "{{ paths.homelab }}/apps/traefik/"
+        dest: "{{ traefik.home }}/"
+        owner: "{{ traefik.user }}"
+        group: "{{ traefik.user }}"
+        mode: "{{ traefik.permissions.config }}"
 
-    - name: Copy credentials to target server
-      copy:
-        src: "~/credentials/apps/traefik/"
-        dest: /home/traefik-user/traefik/data/
-        owner: traefik-user
-        group: traefik-user
-        # mode: '0600'
+    - name: Copy Traefik secrets.yml
+      ansible.builtin.copy:
+        src: "{{ paths.credentials }}/{{ repositories.credentials.paths.traefik.secrets }}"
+        dest: "{{ traefik.files.secrets }}"
+        owner: "{{ traefik.user }}"
+        group: "{{ traefik.user }}"
+        mode: "{{ traefik.permissions.secrets }}"
 
-    - name: Set permissions on acme.json
-      file:
-        path: /home/traefik-user/traefik/data/acme.json
-        mode: '0600'
-      become: true
-      become_user: root
-
-    - name: Set permissions on secrets.sh script
-      file:
-        path: /home/traefik-user/traefik/secrets.sh
-        mode: '0755'
-      become: true
-      become_user: root
+    - name: Copy acme.json
+      ansible.builtin.copy:
+        src: "{{ paths.credentials }}/{{ repositories.credentials.paths.traefik.acme }}"
+        dest: "{{ traefik.files.acme }}"
+        owner: "{{ traefik.user }}"
+        group: "{{ traefik.user }}"
+        mode: "{{ traefik.permissions.acme }}"
 
     - name: Run secrets.sh script
-      command: /home/traefik-user/traefik/secrets.sh
+      ansible.builtin.command: "./secrets.sh"
       args:
-        chdir: /home/traefik-user/traefik/
+        chdir: "{{ traefik.home }}"
       become: true
       become_user: root
 
-    - name: Create docker network proxy with sudo
-      command: sudo docker network create proxy
-      become: true
-      become_user: root
+    - name: Create docker network proxy
+      ansible.builtin.command: docker network create {{ traefik.docker.network }}
       ignore_errors: true
       register: docker_network_error
 
-    - name: Display error message if the previous task failed
-      debug:
-        msg: >
-          "The task failed with the following error:
-          {{ docker_network_error.stderr }}"
+    - name: Display error message if network creation failed
+      ansible.builtin.debug:
+        msg: "Network creation failed: {{ docker_network_error.stderr }}"
       when: docker_network_error.failed
 
-    - name: Run docker-compose up with sudo
-      command: sudo docker-compose up -d --force-recreate
+    - name: Run docker-compose
+      ansible.builtin.command: docker-compose up -d --force-recreate
       args:
-        chdir: /home/traefik-user/traefik
+        chdir: "{{ traefik.home }}"
       become: true
       become_user: root

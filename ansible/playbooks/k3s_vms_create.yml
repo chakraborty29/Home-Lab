@@ -1,35 +1,56 @@
 ---
 - name: Get target IP from inventory
-  set_fact:
+  ansible.builtin.set_fact:
     target_ip: "{{ hostvars[item].ansible_host }}"
 
-- name: Ping the target IP
-  shell: "ping -c 1 -W 1 {{ target_ip }}"
-  register: ping_result
+- name: Check if host is available
+  ansible.builtin.wait_for:
+    host: "{{ target_ip }}"
+    port: 22
+    timeout: 1
+    state: stopped
+  register: host_check
   ignore_errors: true
 
-- name: Copy template files for VM if not alive
-  synchronize:
-    src: "{{ terraform_dir }}/templates/terraform-base-template/"
-    dest: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}"
-    mode: push
+- name: Create terraform working directory
+  ansible.builtin.file:
+    path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
+    state: directory
+    mode: '0755'
+  when: host_check.failed
 
-# - name: Copy template files for VM if not alive
-#   command: "cp -R {{ homelab_dir }}/templates/terraform-base-template {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
-#   when: ping_result.rc != 0
+- name: Copy template files for VM if not alive
+  ansible.builtin.synchronize:
+    src: "{{ paths.terraform }}/templates/terraform-base-template/"
+    dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
+    mode: push
+  when: host_check.failed
 
 - name: Copy config file for VM if not alive
-  command: "cp {{ credentials_dir }}/k3s/{{ item }}.tfvars {{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
-  when: ping_result.rc != 0
+  ansible.builtin.copy:
+    src: "{{ paths.credentials }}/k3s/{{ item }}.tfvars"
+    dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+    mode: '0644'
+  when: host_check.failed
 
-- name: Initiate Terraform
-  command: "terraform init"
+- name: Initialize Terraform
+  ansible.builtin.command: terraform init
   args:
-    chdir: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/"
-  when: ping_result.rc != 0
+    chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+  when: host_check.failed
 
 - name: Build VM if target is not alive
-  command: "terraform apply -auto-approve -var-file='{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'"
+  ansible.builtin.command: >
+    terraform apply -auto-approve 
+    -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
   args:
-    chdir: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/"
-  when: ping_result.rc != 0
+    chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+  when: host_check.failed
+  register: terraform_apply
+
+- name: Wait for VM to be ready
+  ansible.builtin.wait_for:
+    host: "{{ target_ip }}"
+    port: 22
+    timeout: 300
+  when: host_check.failed

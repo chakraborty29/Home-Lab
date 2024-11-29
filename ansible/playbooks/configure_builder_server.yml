@@ -4,85 +4,122 @@
 - name: Configure Builder Server
   hosts: builders
   become: true
-  vars_files:
-    - ../vars/main.yml
+  
   tasks:
     - name: Check if GitHub SSH key exists
-      stat:
-        path: /home/ansible/.ssh/github_rsa
+      ansible.builtin.stat:
+        path: "/home/{{ common.ansible_user }}/.ssh/github_rsa"
       register: github_key_stat
 
     - name: Copy GitHub private key
-      copy:
-        src: "{{ github_private_key_src }}"
-        dest: /home/ansible/.ssh/github_rsa
-        owner: ansible
-        group: ansible
-        mode: '0600'
+      ansible.builtin.copy:
+        src: "{{ ssh_keys.github.private_key }}"
+        dest: "/home/{{ common.ansible_user }}/.ssh/github_rsa"
+        owner: "{{ common.ansible_user }}"
+        group: "{{ common.ansible_user }}"
+        mode: "{{ ssh_keys.github.file_mode }}"
       when: not github_key_stat.stat.exists
 
-    - name: Check if Assible SSH key exists
-      stat:
-        path: /home/ansible/.ssh/ansible_id_rsa
+    - name: Check if Ansible SSH key exists
+      ansible.builtin.stat:
+        path: "/home/{{ common.ansible_user }}/.ssh/ansible_id_rsa"
       register: ansible_key_stat
 
-    - name: Copy Assible private key
-      copy:
-        src: "{{ ansible_private_key_src }}"
-        dest: /home/ansible/.ssh/ansible_id_rsa
-        owner: ansible
-        group: ansible
-        mode: '0600'
+    - name: Copy Ansible private key
+      ansible.builtin.copy:
+        src: "{{ ssh_keys.ansible.private_key }}"
+        dest: "/home/{{ common.ansible_user }}/.ssh/ansible_id_rsa"
+        owner: "{{ common.ansible_user }}"
+        group: "{{ common.ansible_user }}"
+        mode: "{{ ssh_keys.ansible.file_mode }}"
       when: not ansible_key_stat.stat.exists
 
     - name: Start SSH agent
-      shell: |
+      ansible.builtin.shell: |
         eval "$(ssh-agent -s)"
-        ssh-add /home/ansible/.ssh/github_rsa
+        ssh-add /home/{{ common.ansible_user }}/.ssh/github_rsa
       become: true
-      become_user: ansible
+      become_user: "{{ common.ansible_user }}"
       when: not github_key_stat.stat.exists
 
     - name: Ensure git is installed
-      apt:
+      ansible.builtin.apt:
         name: git
         state: present
 
-    - name: Cloning homelab repository
-      git:
-        repo: "{{ homelab_repo_url }}"
-        dest: /home/ansible/homelab
-        version: develop
-        key_file: /home/ansible/.ssh/github_rsa
-        accept_hostkey: true
-        update: true
-
-    - name: Cloning credentials repository
-      git:
-        repo: "{{ credentials_repo_url }}"
-        dest: /home/ansible/credentials
-        version: develop
-        key_file: /home/ansible/.ssh/github_rsa
-        accept_hostkey: true
-        update: true
-
-    - name: Set ownership of credentials directory
-      file:
-        path: /home/ansible/credentials
+    - name: Create required directories
+      ansible.builtin.file:
+        path: "{{ item }}"
         state: directory
-        owner: ansible
-        group: ansible
-        recurse: true
+        owner: "{{ common.ansible_user }}"
+        group: "{{ common.ansible_user }}"
+        mode: '0755'
+      loop:
+        - "{{ paths.credentials }}"
+        - "{{ paths.homelab }}"
+        - "{{ paths.k3s }}"
+        - "{{ paths.homelab }}/ansible/inventory"
 
-    - name: Set ownership of homelab directory
-      file:
-        path: /home/ansible/homelab
+    - name: Check if repositories exist
+      ansible.builtin.stat:
+        path: "{{ item.dest }}/.git"
+      register: repo_stats
+      loop:
+        - dest: "{{ paths.homelab }}"
+        - dest: "{{ paths.credentials }}"
+        - dest: "{{ paths.k3s }}"
+
+    - name: Remove existing directories if not git repositories
+      ansible.builtin.file:
+        path: "{{ item.item.dest }}"
+        state: absent
+      loop: "{{ repo_stats.results }}"
+      when: item.stat.exists == false and item.item.dest != paths.k3s
+      loop_control:
+        label: "{{ item.item.dest }}"
+
+    - name: Clone or update repositories
+      ansible.builtin.git:
+        repo: "{{ item.repo }}"
+        dest: "{{ item.dest }}"
+        version: "{{ item.version }}"
+        key_file: "/home/{{ common.ansible_user }}/.ssh/github_rsa"
+        accept_hostkey: true
+        force: true
+        update: true
+      loop:
+        - repo: "{{ repositories.homelab.url }}"
+          dest: "{{ paths.homelab }}"
+          version: "{{ repositories.homelab.version }}"
+        - repo: "{{ repositories.credentials.url }}"
+          dest: "{{ paths.credentials }}"
+          version: "{{ repositories.credentials.version }}"
+        - repo: "{{ repositories.k3s.url }}"
+          dest: "{{ paths.k3s }}"
+          version: "{{ repositories.k3s.version }}"
+
+    - name: Set directory ownership
+      ansible.builtin.file:
+        path: "{{ item }}"
         state: directory
-        owner: ansible
-        group: ansible
+        owner: "{{ common.ansible_user }}"
+        group: "{{ common.ansible_user }}"
         recurse: true
+      loop:
+        - "{{ paths.credentials }}"
+        - "{{ paths.homelab }}"
+        - "{{ paths.k3s }}"
+
+    - name: Wait for inventory file to be available
+      ansible.builtin.wait_for:
+        path: "{{ paths.credentials }}/{{ repositories.credentials.paths.inventory.main }}"
+        timeout: 10
 
     - name: Copy Ansible inventory
-      command: >
-        cp /home/ansible/credentials/ansible/inventory
-        /home/ansible/homelab/ansible/inventory
+      ansible.builtin.copy:
+        src: "{{ paths.credentials }}/{{ repositories.credentials.paths.inventory.main }}"
+        dest: "{{ paths.homelab }}/ansible/inventory"
+        owner: "{{ common.ansible_user }}"
+        group: "{{ common.ansible_user }}"
+        mode: '0644'
+        remote_src: true

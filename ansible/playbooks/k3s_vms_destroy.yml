@@ -1,15 +1,29 @@
 ---
 - name: Get target IP from inventory
-  set_fact:
+  ansible.builtin.set_fact:
     target_ip: "{{ hostvars[item].ansible_host }}"
 
-- name: Ping the target IP
-  shell: "ping -c 1 -W 1 {{ target_ip }}"
-  register: ping_result
+- name: Check if host is available
+  ansible.builtin.wait_for:
+    host: "{{ target_ip }}"
+    port: 22
+    timeout: 1
+  register: host_check
   ignore_errors: true
 
-- name: Build VM if target is alive
-  command: "terraform destroy -var-file='{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'"
+- name: Destroy VM if target is alive
+  ansible.builtin.command: >
+    terraform destroy -auto-approve 
+    -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
   args:
-    chdir: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/"
-  when: ping_result.rc == 0
+    chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+  when: host_check is success
+  register: terraform_destroy
+
+- name: Wait for VM to be completely destroyed
+  ansible.builtin.wait_for:
+    host: "{{ target_ip }}"
+    port: 22
+    timeout: 300
+    state: stopped
+  when: terraform_destroy is success
