@@ -1,12 +1,12 @@
 ---
 traefik:
   user: "traefik-user"
-  home: "/home/traefik-user/traefik"
+  home_dir: "/home/traefik-user/traefik"
   docker:
     network: "proxy"
   files:
-    acme: "{{ traefik.home }}/data/acme.json"
-    secrets: "{{ traefik.home }}/data/secrets.yml"
+    acme: "/home/traefik-user/traefik/data/acme.json"
+    secrets: "/home/traefik-user/traefik/data/secrets.yml"
   permissions:
     config: "0755"
     acme: "0600"

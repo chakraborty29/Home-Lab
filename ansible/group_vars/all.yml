@@ -16,7 +16,7 @@ paths:
 repositories:
   homelab:
     url: "git@github.com:chakraborty29/Home-Lab.git"
-    version: "develop"
+    version: "feature/ansible-kubernetes"
   credentials:
     url: "git@github.com:chakraborty29/home-lab-creds.git"
     version: "develop"

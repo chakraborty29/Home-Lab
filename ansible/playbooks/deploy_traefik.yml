@@ -4,7 +4,7 @@
 - name: Deploy Traefik
   hosts: traefik
   become: true
-  
+
   pre_tasks:
     - name: Include traefik secrets
       include_vars:
@@ -15,7 +15,7 @@
     - name: Copy Traefik files to target server
       ansible.builtin.copy:
         src: "{{ paths.homelab }}/apps/traefik/"
-        dest: "{{ traefik.home }}/"
+        dest: "{{ traefik.home_dir }}/"
         owner: "{{ traefik.user }}"
         group: "{{ traefik.user }}"
         mode: "{{ traefik.permissions.config }}"
@@ -39,7 +39,7 @@
     - name: Run secrets.sh script
       ansible.builtin.command: "./secrets.sh"
       args:
-        chdir: "{{ traefik.home }}"
+        chdir: "{{ traefik.home_dir }}"
       become: true
       become_user: root
 
@@ -56,6 +56,6 @@
     - name: Run docker-compose
       ansible.builtin.command: docker-compose up -d --force-recreate
       args:
-        chdir: "{{ traefik.home }}"
+        chdir: "{{ traefik.home_dir }}"
       become: true
       become_user: root
