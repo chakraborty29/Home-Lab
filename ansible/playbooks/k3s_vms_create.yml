@@ -14,7 +14,7 @@
 
         - name: Copy terraform templates
           ansible.builtin.synchronize:
-            src: "{{ paths.terraform }}/templates/terraform-base-template/"
+            src: "{{ paths.homelab }}/templates/terraform-base-template/"
             dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
             mode: push
           loop: "{{ groups['master'] + groups['node'] }}"
