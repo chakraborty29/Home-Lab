@@ -2,6 +2,9 @@
 traefik:
   docker:
     network: "proxy"
+  files:
+    acme: "{{ traefik_secrets.traefik_system.files.acme }}"
+    secrets: "{{ traefik_secrets.traefik_system.files.secrets }}"
   permissions:
     config: "0755"
     acme: "0600"

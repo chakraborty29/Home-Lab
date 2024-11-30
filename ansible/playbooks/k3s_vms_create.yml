@@ -13,7 +13,7 @@
 
 - name: Copy tfvars files
   ansible.builtin.copy:
-    src: "{{ paths.credentials }}/k3s/{{ item }}.tfvars"
+    src: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/k3s/{{ item }}.tfvars"
     dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
     mode: '0644'
 

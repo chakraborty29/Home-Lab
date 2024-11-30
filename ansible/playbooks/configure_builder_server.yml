@@ -6,10 +6,38 @@
   become: true
 
   tasks:
+    - name: Create base directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ common.ansible_user }}"
+        group: "{{ common.ansible_user }}"
+        mode: '0755'
+      loop:
+        - "{{ paths.credentials }}"
+        - "{{ paths.homelab }}"
+        - "{{ paths.k3s }}"
+      tags: [always, init, update]
+
+    - name: Create ansible directory
+      ansible.builtin.file:
+        path: "{{ paths.homelab }}/ansible"
+        state: directory
+        owner: "{{ common.ansible_user }}"
+        group: "{{ common.ansible_user }}"
+        mode: '0755'
+      tags: [always, init, update]
+
     - name: Include all secrets
       include_vars:
-        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/all/secrets.yml"
+        file: "{{ local_credentials_path | default(paths.credentials) }}/{{ repositories.credentials.paths.ansible_vars }}/all/secrets.yml"
         name: all_secrets
+      when: local_credentials_path is defined
+
+    - name: Set repository URLs from local secrets
+      set_fact:
+        repositories: "{{ repositories | combine({'homelab': {'url': all_secrets.repositories.urls.homelab}}, {'credentials': {'url': all_secrets.repositories.urls.credentials}}, recursive=True) }}"
+      when: local_credentials_path is defined
 
     - name: Check if GitHub SSH key exists
       ansible.builtin.stat:
@@ -57,28 +85,6 @@
         name: git
         state: present
       tags: [always, init]
-
-    - name: Create base directories
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-        owner: "{{ common.ansible_user }}"
-        group: "{{ common.ansible_user }}"
-        mode: '0755'
-      loop:
-        - "{{ paths.credentials }}"
-        - "{{ paths.homelab }}"
-        - "{{ paths.k3s }}"
-      tags: [always, init, update]
-
-    - name: Create ansible directory
-      ansible.builtin.file:
-        path: "{{ paths.homelab }}/ansible"
-        state: directory
-        owner: "{{ common.ansible_user }}"
-        group: "{{ common.ansible_user }}"
-        mode: '0755'
-      tags: [always, init, update]
 
     - name: Remove existing inventory file if exists
       ansible.builtin.file:

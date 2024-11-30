@@ -33,7 +33,7 @@ repositories:
     url: "https://github.com/techno-tim/k3s-ansible.git"
     version: "master"
 
-# Reference SSH keys from secrets
+# SSH key configurations
 ssh_keys:
   github:
     file_mode: "0600"

@@ -23,17 +23,17 @@
     - name: Copy Traefik secrets.yml
       ansible.builtin.copy:
         src: "{{ paths.credentials }}/{{ repositories.credentials.paths.traefik.secrets }}"
-        dest: "{{ traefik.files.secrets }}"
-        owner: "{{ traefik.user }}"
-        group: "{{ traefik.user }}"
+        dest: "{{ traefik_secrets.traefik_system.files.secrets }}"
+        owner: "{{ traefik_secrets.traefik_system.user }}"
+        group: "{{ traefik_secrets.traefik_system.user }}"
         mode: "{{ traefik.permissions.secrets }}"
 
     - name: Copy acme.json
       ansible.builtin.copy:
         src: "{{ paths.credentials }}/{{ repositories.credentials.paths.traefik.acme }}"
-        dest: "{{ traefik.files.acme }}"
-        owner: "{{ traefik.user }}"
-        group: "{{ traefik.user }}"
+        dest: "{{ traefik_secrets.traefik_system.files.acme }}"
+        owner: "{{ traefik_secrets.traefik_system.user }}"
+        group: "{{ traefik_secrets.traefik_system.user }}"
         mode: "{{ traefik.permissions.acme }}"
 
     - name: Run secrets.sh script
