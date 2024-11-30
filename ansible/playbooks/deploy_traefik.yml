@@ -8,16 +8,16 @@
   pre_tasks:
     - name: Include traefik secrets
       include_vars:
-        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.traefik.secrets }}"
+        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/traefik/secrets.yml"
         name: traefik_secrets
 
   tasks:
     - name: Copy Traefik files to target server
       ansible.builtin.copy:
         src: "{{ paths.homelab }}/apps/traefik/"
-        dest: "{{ traefik.home_dir }}/"
-        owner: "{{ traefik.user }}"
-        group: "{{ traefik.user }}"
+        dest: "{{ traefik_secrets.traefik_system.home_dir }}/"
+        owner: "{{ traefik_secrets.traefik_system.user }}"
+        group: "{{ traefik_secrets.traefik_system.user }}"
         mode: "{{ traefik.permissions.config }}"
 
     - name: Copy Traefik secrets.yml

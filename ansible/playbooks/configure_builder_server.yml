@@ -6,6 +6,11 @@
   become: true
 
   tasks:
+    - name: Include all secrets
+      include_vars:
+        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/all/secrets.yml"
+        name: all_secrets
+
     - name: Check if GitHub SSH key exists
       ansible.builtin.stat:
         path: "/home/{{ common.ansible_user }}/.ssh/github_rsa"
@@ -14,7 +19,7 @@
 
     - name: Copy GitHub private key
       ansible.builtin.copy:
-        src: "{{ ssh_keys.github.private_key }}"
+        src: "{{ all_secrets.ssh_keys.github.private_key }}"
         dest: "/home/{{ common.ansible_user }}/.ssh/github_rsa"
         owner: "{{ common.ansible_user }}"
         group: "{{ common.ansible_user }}"
@@ -30,7 +35,7 @@
 
     - name: Copy Ansible private key
       ansible.builtin.copy:
-        src: "{{ ssh_keys.ansible.private_key }}"
+        src: "{{ all_secrets.ssh_keys.ansible.private_key }}"
         dest: "/home/{{ common.ansible_user }}/.ssh/ansible_id_rsa"
         owner: "{{ common.ansible_user }}"
         group: "{{ common.ansible_user }}"

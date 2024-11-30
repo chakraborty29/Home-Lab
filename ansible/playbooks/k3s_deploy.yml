@@ -5,7 +5,7 @@
   pre_tasks:
     - name: Include k3s secrets
       include_vars:
-        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.k3s.secrets }}"
+        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/k3s/secrets.yml"
         name: k3s_secrets
 
     - name: Verify required variables are defined
@@ -40,14 +40,8 @@
           dest: "{{ paths.k3s }}/inventory/my-cluster/hosts.ini"
         - src: "{{ paths.k3s }}/ansible.example.cfg"
           dest: "{{ paths.k3s }}/ansible.cfg"
-
-    - name: Template k3s configuration
-      ansible.builtin.template:
-        src: "{{ playbook_dir }}/k3s.yml"
-        dest: "{{ paths.k3s }}/inventory/my-cluster/group_vars/all.yml"
-        mode: '0644'
-      vars:
-        k3s_token: "{{ k3s_secrets.k3s_token }}"
+        - src: "../group_vars/k3s.yml"
+          dest: "{{ paths.k3s }}/inventory/my-cluster/group_vars/all.yml"
 
     - name: Create master nodes
       ansible.builtin.include_tasks: k3s_vms_create.yml

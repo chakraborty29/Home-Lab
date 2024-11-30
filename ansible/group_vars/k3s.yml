@@ -1,4 +1,5 @@
 ---
+# Basic configurations
 k3s_version: v1.30.2+k3s2
 # this is the user that has ssh access to these machines
 ansible_user: ansible
@@ -16,14 +17,14 @@ kube_vip_arp: true
 # enable kube-vip BGP peering
 kube_vip_bgp: false
 
-# bgp parameters for kube-vip
-kube_vip_bgp_routerid: "127.0.0.1"  # Defines the router ID for the BGP server
-kube_vip_bgp_as: "64513"  # Defines the AS for the BGP server
-kube_vip_bgp_peeraddress: "10.29.30.113"  # Defines the address for the BGP peer
-kube_vip_bgp_peeras: "64512"  # Defines the AS for the BGP peer
+# BGP parameters for kube-vip (from secrets)
+kube_vip_bgp_routerid: "{{ k3s_network.bgp.routerid }}"
+kube_vip_bgp_as: "{{ k3s_network.bgp.as }}"
+kube_vip_bgp_peeraddress: "{{ k3s_network.bgp.peer.address }}"
+kube_vip_bgp_peeras: "{{ k3s_network.bgp.peer.as }}"
 
-# apiserver_endpoint is virtual ip-address which will be configured on each master
-apiserver_endpoint: 10.29.30.114
+# apiserver_endpoint is virtual ip-address which will be configured on each master (from secrets)
+apiserver_endpoint: "{{ k3s_network.apiserver_endpoint }}"
 
 # k3s_token is required  masters can talk together securely
 # this token should be alpha numeric only
@@ -50,7 +51,7 @@ extra_server_args: >-
   {% if calico_iface is defined or cilium_iface is defined %}
   --flannel-backend=none
   --disable-network-policy
-  --cluster-cidr={{ cluster_cidr | default('10.52.0.0/16') }}
+  --cluster-cidr={{ k3s_network.cluster_cidr }}
   {% endif %}
   --tls-san {{ apiserver_endpoint }}
   --disable servicelb
