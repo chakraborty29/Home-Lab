@@ -39,7 +39,7 @@
     - name: Run secrets.sh script
       ansible.builtin.command: "./secrets.sh"
       args:
-        chdir: "{{ traefik.home_dir }}"
+        chdir: "{{ traefik_secrets.traefik_system.home_dir }}"
       become: true
       become_user: root
 
@@ -56,6 +56,6 @@
     - name: Run docker-compose
       ansible.builtin.command: docker-compose up -d --force-recreate
       args:
-        chdir: "{{ traefik.home_dir }}"
+        chdir: "{{ traefik_secrets.traefik_system.home_dir }}"
       become: true
       become_user: root
