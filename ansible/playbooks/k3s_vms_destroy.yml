@@ -1,11 +1,11 @@
 ---
-- name: Check if VM is available
-  ansible.builtin.wait_for:
-    host: "{{ item }}"
-    port: 22
-    timeout: 1
-  register: host_check
-  ignore_errors: true
+# - name: Check if VM is available
+#   ansible.builtin.wait_for:
+#     host: "{{ item }}"
+#     port: 22
+#     timeout: 1
+#   register: host_check
+#   ignore_errors: true
 
 - name: Destroy VM
   ansible.builtin.command: >
@@ -13,7 +13,7 @@
     -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
   args:
     chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
-  when: "host_check.failed == false"
+  # when: "host_check.failed == false"
   register: terraform_destroy
 
 - name: Wait for VM to be fully destroyed
