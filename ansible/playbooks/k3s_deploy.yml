@@ -41,10 +41,11 @@
         ansible-playbook site.yml 
         -i inventory/my-cluster/hosts.ini 
         --private-key /home/{{ common.ansible_user }}/.ssh/ansible_id_rsa
+        -e "ansible_user={{ common.ansible_user }}"
       args:
         chdir: "{{ paths.k3s }}"
       when: nodes_ready is success
       environment:
         ANSIBLE_HOST_KEY_CHECKING: "False"
         ANSIBLE_SSH_ARGS: "-o StrictHostKeyChecking=no"
-        ANSIBLE_VARS_ENABLED: "all"
+        ANSIBLE_REMOTE_USER: "{{ common.ansible_user }}"
