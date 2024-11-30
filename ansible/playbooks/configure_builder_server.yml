@@ -5,7 +5,7 @@
   hosts: builders
   become: true
 
-  tasks:
+  pre_tasks:
     - name: Create base directories
       ansible.builtin.file:
         path: "{{ item }}"
@@ -32,10 +32,12 @@
       include_vars:
         file: "{{ local_credentials_path | default(paths.credentials) }}/{{ repositories.credentials.paths.ansible_vars }}/all/secrets.yml"
         name: all_secrets
+      tags: [always, init, update, repos]
 
     - name: Set repository URLs
       set_fact:
         repositories: "{{ repositories | combine({'homelab': {'url': all_secrets.repositories.urls.homelab}}, {'credentials': {'url': all_secrets.repositories.urls.credentials}}, recursive=True) }}"
+      tags: [always, init, update, repos]
 
     - name: Check if GitHub SSH key exists
       ansible.builtin.stat:
