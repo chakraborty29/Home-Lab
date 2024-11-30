@@ -1,35 +1,9 @@
-- name: Destroy K3s Servers
+- name: Destroy K3s
   hosts: builders
   become: true
-  
-  pre_tasks:
-    - name: Verify required variables are defined
-      assert:
-        that:
-          - paths.terraform is defined
-          - paths.credentials is defined
-        fail_msg: "Required variables are not defined"
-  
+
   tasks:
-    - name: Destroy master nodes
-      ansible.builtin.include_tasks: k3s_vms_destroy.yml
-      loop: "{{ groups['master'] }}"
-      loop_control:
-        loop_var: item
-        label: "{{ item }}"
-      register: master_destroy
-
-    - name: Destroy worker nodes
-      ansible.builtin.include_tasks: k3s_vms_destroy.yml
-      loop: "{{ groups['node'] }}"
-      loop_control:
-        loop_var: item
-        label: "{{ item }}"
-      register: worker_destroy
-
-    - name: Clean up terraform directories
-      ansible.builtin.file:
-        path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
-        state: absent
-      loop: "{{ groups['master'] + groups['node'] }}"
-      when: (master_destroy is success) and (worker_destroy is success)
+    - name: Reset K3s cluster
+      ansible.builtin.command: "ansible-playbook reset.yml -i inventory/my-cluster/hosts.ini"
+      args:
+        chdir: "{{ paths.k3s }}"

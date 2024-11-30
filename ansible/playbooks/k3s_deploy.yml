@@ -3,78 +3,16 @@
   become: true
   
   pre_tasks:
-    - name: Include k3s secrets
-      include_vars:
-        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/k3s/secrets.yml"
-        name: k3s_secrets
-
-    - name: Verify required variables are defined
-      assert:
-        that:
-          - k3s_secrets.k3s_token is defined
-          - paths.k3s is defined
-          - paths.terraform is defined
-          - paths.credentials is defined
-        fail_msg: "Required variables are not defined"
-
-  tasks:
-    - name: Install extra Ansible packages
-      ansible.builtin.command: >
-        ansible-galaxy collection install -r
-        {{ paths.k3s }}/collections/requirements.yml
-      changed_when: false
-
-    - name: Create k3s directories
-      ansible.builtin.file:
-        path: "{{ item }}"
-        state: directory
-        mode: '0755'
-      loop:
-        - "{{ paths.k3s }}/inventory/my-cluster"
-        - "{{ paths.k3s }}/inventory/my-cluster/group_vars"
-
-    - name: Copy K3s configurations
-      ansible.builtin.copy:
-        src: "{{ item.src }}"
-        dest: "{{ item.dest }}"
-        mode: "{{ item.mode | default('0644') }}"
-      loop:
-        - src: "{{ paths.credentials }}/{{ repositories.credentials.paths.inventory.k3s }}"
-          dest: "{{ paths.k3s }}/inventory/my-cluster/hosts.ini"
-        - src: "{{ paths.k3s }}/ansible.example.cfg"
-          dest: "{{ paths.k3s }}/ansible.cfg"
-        - src: "../group_vars/k3s.yml"
-          dest: "{{ paths.k3s }}/inventory/my-cluster/group_vars/all.yml"
-
-    - name: Create master nodes
-      ansible.builtin.include_tasks: k3s_vms_create.yml
-      loop: "{{ groups['master'] }}"
-      loop_control:
-        loop_var: item
-      register: master_creation
-
-    - name: Create worker nodes
-      ansible.builtin.include_tasks: k3s_vms_create.yml
-      loop: "{{ groups['node'] }}"
-      loop_control:
-        loop_var: item
-      register: worker_creation
-
     - name: Wait for all nodes to be ready
       ansible.builtin.wait_for:
         host: "{{ hostvars[item].ansible_host }}"
         port: 22
         timeout: 300
       loop: "{{ groups['master'] + groups['node'] }}"
-      when: (master_creation is success) and (worker_creation is success)
       register: nodes_ready
 
     - name: Deploy K3s cluster
       ansible.builtin.command: "ansible-playbook site.yml -i inventory/my-cluster/hosts.ini"
       args:
         chdir: "{{ paths.k3s }}"
-      register: k3s_deploy
-      changed_when: k3s_deploy.rc == 0
-      when: (master_creation is success) and 
-            (worker_creation is success) and
-            (nodes_ready is success)
+      when: nodes_ready is success
