@@ -32,12 +32,10 @@
       include_vars:
         file: "{{ local_credentials_path | default(paths.credentials) }}/{{ repositories.credentials.paths.ansible_vars }}/all/secrets.yml"
         name: all_secrets
-      when: local_credentials_path is defined
 
-    - name: Set repository URLs from local secrets
+    - name: Set repository URLs
       set_fact:
         repositories: "{{ repositories | combine({'homelab': {'url': all_secrets.repositories.urls.homelab}}, {'credentials': {'url': all_secrets.repositories.urls.credentials}}, recursive=True) }}"
-      when: local_credentials_path is defined
 
     - name: Check if GitHub SSH key exists
       ansible.builtin.stat:
