@@ -26,10 +26,18 @@
       ansible.builtin.blockinfile:
         path: "{{ paths.k3s }}/inventory/my-cluster/group_vars/all.yml"
         block: |
-          # K3s secrets
-          k3s_secrets:
-            k3s_token: "{{ k3s_secrets.k3s_token }}"
-            k3s_network: {{ k3s_secrets.k3s_network | to_yaml }}
+          k3s_token: "{{ k3s_secrets.k3s_token }}"
+          k3s_network:
+            apiserver_endpoint: "{{ k3s_secrets.k3s_network.apiserver_endpoint }}"
+            cluster_cidr: "{{ k3s_secrets.k3s_network.cluster_cidr }}"
+            bgp:
+              routerid: "{{ k3s_secrets.k3s_network.bgp.routerid }}"
+              as: "{{ k3s_secrets.k3s_network.bgp.as }}"
+              peer:
+                address: "{{ k3s_secrets.k3s_network.bgp.peer.address }}"
+                as: "{{ k3s_secrets.k3s_network.bgp.peer.as }}"
+            metallb:
+              iprange: "{{ k3s_secrets.k3s_network.metallb.iprange }}"
         marker: "# {mark} K3S SECRETS"
 
     - name: Wait for all nodes to be ready
