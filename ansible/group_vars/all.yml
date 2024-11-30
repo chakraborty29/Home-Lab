@@ -27,7 +27,6 @@ repositories:
         secrets: "ansible/group_vars/k3s/secrets.yml"
       traefik:
         secrets: "ansible/group_vars/traefik/secrets.yml"
-        acme: "apps/traefik/acme.json"
       ssh_keys: "ssh"
   k3s:
     url: "https://github.com/techno-tim/k3s-ansible.git"
