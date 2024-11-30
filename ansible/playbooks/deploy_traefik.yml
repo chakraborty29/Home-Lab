@@ -12,13 +12,29 @@
         name: traefik_secrets
 
   tasks:
-    - name: Copy Traefik files to target server
-      ansible.builtin.copy:
-        src: "{{ paths.homelab }}/apps/traefik/"
-        dest: "{{ traefik_secrets.traefik_system.home_dir }}/"
+    - name: Create Traefik directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
         owner: "{{ traefik_secrets.traefik_system.user }}"
         group: "{{ traefik_secrets.traefik_system.user }}"
         mode: "{{ traefik.permissions.config }}"
+      loop:
+        - "{{ traefik_secrets.traefik_system.home_dir }}"
+        - "{{ traefik_secrets.traefik_system.home_dir }}/data"
+
+    - name: Copy Traefik configuration files
+      ansible.builtin.copy:
+        src: "{{ paths.homelab }}/apps/traefik/{{ item }}"
+        dest: "{{ traefik_secrets.traefik_system.home_dir }}/{{ item }}"
+        owner: "{{ traefik_secrets.traefik_system.user }}"
+        group: "{{ traefik_secrets.traefik_system.user }}"
+        mode: "{{ traefik.permissions.config }}"
+      loop:
+        - docker-compose.yml
+        - data/config.yml
+        - data/traefik.yml
+        - secrets.sh
 
     - name: Copy Traefik secrets.yml
       ansible.builtin.copy:
