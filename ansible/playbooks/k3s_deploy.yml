@@ -24,11 +24,14 @@
         {{ paths.k3s }}/collections/requirements.yml
       changed_when: false
 
-    - name: Create k3s cluster directory
+    - name: Create k3s directories
       ansible.builtin.file:
-        path: "{{ paths.k3s }}/inventory/my-cluster"
+        path: "{{ item }}"
         state: directory
         mode: '0755'
+      loop:
+        - "{{ paths.k3s }}/inventory/my-cluster"
+        - "{{ paths.k3s }}/inventory/my-cluster/group_vars"
 
     - name: Copy K3s configurations
       ansible.builtin.copy:
