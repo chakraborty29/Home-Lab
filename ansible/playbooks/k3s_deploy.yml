@@ -1,6 +1,8 @@
 - name: Deploy K3s
   hosts: builders
   become: true
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   
   pre_tasks:
     - name: Wait for all nodes to be ready
@@ -11,8 +13,16 @@
       loop: "{{ groups['master'] + groups['node'] }}"
       register: nodes_ready
 
+    - name: Add SSH fingerprints
+      ansible.builtin.shell: >
+        ssh-keyscan -H {{ hostvars[item].ansible_host }} >> ~/.ssh/known_hosts
+      loop: "{{ groups['master'] + groups['node'] }}"
+      changed_when: false
+
     - name: Deploy K3s cluster
       ansible.builtin.command: "ansible-playbook site.yml -i inventory/my-cluster/hosts.ini"
       args:
         chdir: "{{ paths.k3s }}"
       when: nodes_ready is success
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: "False"
