@@ -22,6 +22,16 @@
         dest: "{{ paths.k3s }}/inventory/my-cluster/group_vars/all.yml"
         mode: '0644'
 
+    - name: Add k3s secrets to configuration
+      ansible.builtin.blockinfile:
+        path: "{{ paths.k3s }}/inventory/my-cluster/group_vars/all.yml"
+        block: |
+          # K3s secrets
+          k3s_secrets:
+            k3s_token: "{{ k3s_secrets.k3s_token }}"
+            k3s_network: {{ k3s_secrets.k3s_network | to_yaml }}
+        marker: "# {mark} K3S SECRETS"
+
     - name: Wait for all nodes to be ready
       ansible.builtin.wait_for:
         host: "{{ hostvars[item].ansible_host }}"
