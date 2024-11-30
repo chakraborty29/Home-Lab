@@ -5,7 +5,6 @@
     -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
   args:
     chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
-  ignore_errors: true
   register: terraform_destroy
 
 - name: Wait for VM to be fully destroyed
