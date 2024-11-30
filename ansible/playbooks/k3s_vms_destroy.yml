@@ -1,25 +1,17 @@
 ---
-# - name: Check if VM is available
-#   ansible.builtin.wait_for:
-#     host: "{{ item }}"
-#     port: 22
-#     timeout: 1
-#   register: host_check
-#   ignore_errors: true
-
 - name: Destroy VM
   ansible.builtin.command: >
     terraform destroy -auto-approve 
     -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
   args:
     chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
-  # when: "host_check.failed == false"
+  ignore_errors: true
   register: terraform_destroy
 
 - name: Wait for VM to be fully destroyed
   ansible.builtin.wait_for:
-    host: "{{ item }}"
+    host: "{{ hostvars[item].ansible_host }}"
     port: 22
     timeout: 300
     state: stopped
-  when: "terraform_destroy.changed | default(false)"
+  when: "terraform_destroy.rc == 0"
