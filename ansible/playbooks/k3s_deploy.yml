@@ -5,6 +5,11 @@
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   
   pre_tasks:
+    - name: Include k3s secrets
+      include_vars:
+        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/k3s/secrets.yml"
+        name: k3s_secrets
+
     - name: Wait for all nodes to be ready
       ansible.builtin.wait_for:
         host: "{{ hostvars[item].ansible_host }}"
