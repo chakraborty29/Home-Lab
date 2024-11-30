@@ -32,19 +32,19 @@
         group: "{{ traefik_secrets.traefik_system.user }}"
         mode: "{{ traefik.permissions.config }}"
 
-    # Then overlay the secret files from private repo
+    # Then overlay the secret files from private repo using group_vars paths
     - name: Copy Traefik secrets.yml from private repo
       ansible.builtin.copy:
-        src: "{{ paths.credentials }}/{{ repositories.credentials.paths.traefik.secrets }}"
-        dest: "{{ traefik_secrets.traefik_system.files.secrets }}"
+        src: "{{ paths.credentials }}/apps/traefik/data/secrets.yml"
+        dest: "{{ traefik.files.secrets }}"
         owner: "{{ traefik_secrets.traefik_system.user }}"
         group: "{{ traefik_secrets.traefik_system.user }}"
         mode: "{{ traefik.permissions.secrets }}"
 
     - name: Copy acme.json from private repo
       ansible.builtin.copy:
-        src: "{{ paths.credentials }}/{{ repositories.credentials.paths.traefik.acme }}"
-        dest: "{{ traefik_secrets.traefik_system.files.acme }}"
+        src: "{{ paths.credentials }}/apps/traefik/data/acme.json"
+        dest: "{{ traefik.files.acme }}"
         owner: "{{ traefik_secrets.traefik_system.user }}"
         group: "{{ traefik_secrets.traefik_system.user }}"
         mode: "{{ traefik.permissions.acme }}"
