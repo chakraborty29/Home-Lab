@@ -10,6 +10,18 @@
         file: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/k3s/secrets.yml"
         name: k3s_secrets
 
+    - name: Create k3s directories
+      ansible.builtin.file:
+        path: "{{ paths.k3s }}/inventory/my-cluster/group_vars"
+        state: directory
+        mode: '0755'
+
+    - name: Copy k3s configuration
+      ansible.builtin.copy:
+        src: "../group_vars/k3s.yml"
+        dest: "{{ paths.k3s }}/inventory/my-cluster/group_vars/all.yml"
+        mode: '0644'
+
     - name: Wait for all nodes to be ready
       ansible.builtin.wait_for:
         host: "{{ hostvars[item].ansible_host }}"
@@ -35,3 +47,4 @@
       environment:
         ANSIBLE_HOST_KEY_CHECKING: "False"
         ANSIBLE_SSH_ARGS: "-o StrictHostKeyChecking=no"
+        ANSIBLE_VARS_ENABLED: "all"
