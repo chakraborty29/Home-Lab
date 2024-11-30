@@ -20,9 +20,13 @@
       changed_when: false
 
     - name: Deploy K3s cluster
-      ansible.builtin.command: "ansible-playbook site.yml -i inventory/my-cluster/hosts.ini"
+      ansible.builtin.command: >
+        ansible-playbook site.yml 
+        -i inventory/my-cluster/hosts.ini 
+        --private-key /home/{{ common.ansible_user }}/.ssh/ansible_id_rsa
       args:
         chdir: "{{ paths.k3s }}"
       when: nodes_ready is success
       environment:
         ANSIBLE_HOST_KEY_CHECKING: "False"
+        ANSIBLE_SSH_ARGS: "-o StrictHostKeyChecking=no"

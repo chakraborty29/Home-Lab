@@ -1,9 +1,17 @@
 - name: Destroy K3s
   hosts: builders
   become: true
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
 
   tasks:
     - name: Reset K3s cluster
-      ansible.builtin.command: "ansible-playbook reset.yml -i inventory/my-cluster/hosts.ini"
+      ansible.builtin.command: >
+        ansible-playbook reset.yml 
+        -i inventory/my-cluster/hosts.ini 
+        --private-key /home/{{ common.ansible_user }}/.ssh/ansible_id_rsa
       args:
         chdir: "{{ paths.k3s }}"
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: "False"
+        ANSIBLE_SSH_ARGS: "-o StrictHostKeyChecking=no"
