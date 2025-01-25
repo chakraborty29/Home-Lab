@@ -27,18 +27,19 @@
       ansible.builtin.copy:
         content: |
           ---
-          k3s_token: "{{ k3s_secrets.k3s_token }}"
-          k3s_network:
-            apiserver_endpoint: "{{ k3s_secrets.k3s_network.apiserver_endpoint }}"
-            cluster_cidr: "{{ k3s_secrets.k3s_network.cluster_cidr }}"
-            bgp:
-              routerid: "{{ k3s_secrets.k3s_network.bgp.routerid }}"
-              as: "{{ k3s_secrets.k3s_network.bgp.as }}"
-              peer:
-                address: "{{ k3s_secrets.k3s_network.bgp.peer.address }}"
-                as: "{{ k3s_secrets.k3s_network.bgp.peer.as }}"
-            metallb:
-              iprange: "{{ k3s_secrets.k3s_network.metallb.iprange }}"
+          k3s_secrets:
+            k3s_token: "{{ k3s_secrets.k3s_token }}"
+            k3s_network:
+              apiserver_endpoint: "{{ k3s_secrets.k3s_network.apiserver_endpoint }}"
+              cluster_cidr: "{{ k3s_secrets.k3s_network.cluster_cidr }}"
+              bgp:
+                routerid: "{{ k3s_secrets.k3s_network.bgp.routerid }}"
+                as: "{{ k3s_secrets.k3s_network.bgp.as }}"
+                peer:
+                  address: "{{ k3s_secrets.k3s_network.bgp.peer.address }}"
+                  as: "{{ k3s_secrets.k3s_network.bgp.peer.as }}"
+              metallb:
+                iprange: "{{ k3s_secrets.k3s_network.metallb.iprange }}"
         dest: "{{ paths.k3s }}/inventory/my-cluster/group_vars/k3s_secrets.yml"
         mode: '0600'
 
