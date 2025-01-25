@@ -7,8 +7,9 @@
   pre_tasks:
     - name: Include k3s secrets
       include_vars:
-        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/k3s/secrets.yml"
+        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.k3s.secrets }}"
         name: k3s_secrets
+      tags: [always, init, update]
 
     - name: Create k3s directories
       ansible.builtin.file:
