@@ -24,7 +24,10 @@ cilium_tag: v1.16.0 # cilium version tag
 cilium_hubble: true # enable hubble observability relay and ui
 
 # if using calico or cilium, you may specify the cluster pod cidr pool
-cluster_cidr: "{{ k3s_secrets.k3s_network.cluster_cidr }}"
+# cluster_cidr: "{{ k3s_secrets.k3s_network.cluster_cidr }}"
+
+# enable cilium bgp control plane for lb services and pod cidrs. disables metallb.
+cilium_bgp: false
 
 # bgp parameters for cilium cni. only active when cilium_iface is defined and cilium_bgp is true.
 # cilium_bgp_my_asn: "64513"
