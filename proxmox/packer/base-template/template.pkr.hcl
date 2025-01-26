@@ -203,6 +203,11 @@ build {
         destination = "/tmp/ansible_install.sh"
     }
 
+    provisioner "file" {
+        source = "files/scripts/terraform_install.sh"
+        destination = "/tmp/terraform_install.sh"
+    }
+
     provisioner "shell" {
         inline = [ 
             "chmod +x /tmp/docker_install.sh",
@@ -214,6 +219,13 @@ build {
         inline = [ 
             "chmod +x /tmp/ansible_install.sh",
             "sudo /tmp/ansible_install.sh" 
+        ]
+    }
+
+    provisioner "shell" {
+        inline = [ 
+            "chmod +x /tmp/terraform_install.sh",
+            "sudo /tmp/terraform_install.sh" 
         ]
     }
 
