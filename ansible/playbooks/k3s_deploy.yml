@@ -1,0 +1,73 @@
+- name: Deploy K3s
+  hosts: builders
+  become: true
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  
+  pre_tasks:
+    - name: Include k3s secrets
+      include_vars:
+        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.k3s.secrets }}"
+        name: k3s_secrets
+      tags: [always, init, update]
+
+    - name: Create k3s directories
+      ansible.builtin.file:
+        path: "{{ paths.k3s }}/inventory/my-cluster/group_vars"
+        state: directory
+        mode: '0755'
+
+    - name: Copy k3s configuration
+      ansible.builtin.copy:
+        src: "../group_vars/k3s.yml"
+        dest: "{{ paths.k3s }}/inventory/my-cluster/group_vars/all.yml"
+        mode: '0644'
+
+    - name: Create k3s secrets file
+      ansible.builtin.copy:
+        content: |
+          ---
+          k3s_secrets:
+            k3s_token: "{{ k3s_secrets.k3s_token }}"
+            k3s_network:
+              apiserver_endpoint: "{{ k3s_secrets.k3s_network.apiserver_endpoint }}"
+              cluster_cidr: "{{ k3s_secrets.k3s_network.cluster_cidr }}"
+              bgp:
+                routerid: "{{ k3s_secrets.k3s_network.bgp.routerid }}"
+                as: "{{ k3s_secrets.k3s_network.bgp.as }}"
+                peer:
+                  address: "{{ k3s_secrets.k3s_network.bgp.peer.address }}"
+                  as: "{{ k3s_secrets.k3s_network.bgp.peer.as }}"
+              metallb:
+                iprange: "{{ k3s_secrets.k3s_network.metallb.iprange }}"
+        dest: "{{ paths.k3s }}/inventory/my-cluster/group_vars/k3s_secrets.yml"
+        mode: '0600'
+
+    - name: Wait for all nodes to be ready
+      ansible.builtin.wait_for:
+        host: "{{ hostvars[item].ansible_host }}"
+        port: 22
+        timeout: 300
+      loop: "{{ groups['master'] + groups['node'] }}"
+      register: nodes_ready
+
+    - name: Add SSH fingerprints
+      ansible.builtin.shell: >
+        ssh-keyscan -H {{ hostvars[item].ansible_host }} >> ~/.ssh/known_hosts
+      loop: "{{ groups['master'] + groups['node'] }}"
+      changed_when: false
+
+    - name: Deploy K3s cluster
+      ansible.builtin.command: >
+        ansible-playbook site.yml 
+        -i inventory/my-cluster/hosts.ini 
+        --private-key /home/{{ common.ansible_user }}/.ssh/ansible_id_rsa
+        -e "ansible_user={{ common.ansible_user }}"
+        -e "@inventory/my-cluster/group_vars/k3s_secrets.yml"
+      args:
+        chdir: "{{ paths.k3s }}"
+      when: nodes_ready is success
+      environment:
+        ANSIBLE_HOST_KEY_CHECKING: "False"
+        ANSIBLE_SSH_ARGS: "-o StrictHostKeyChecking=no"
+        ANSIBLE_REMOTE_USER: "{{ common.ansible_user }}"

@@ -18,6 +18,7 @@ autoinstall:
     - sudo
     - net-tools
     - apache2-utils
+    - netaddr
   storage:
     layout:
       name: direct

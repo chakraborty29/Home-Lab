@@ -63,8 +63,8 @@ resource "proxmox_vm_qemu" "your-vm" {
     ipconfig0 = "${var.ipconfig0}"
     
     # (Optional) Default User
-    ciuser = "${var.ciuser}"
-    cipassword = "${var.cipassword}"
+    # ciuser = "${var.ciuser}"
+    # cipassword = "${var.cipassword}"
     
     # (Optional) Add your SSH KEY
     # sshkeys = <<EOF

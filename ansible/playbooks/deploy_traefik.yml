@@ -4,61 +4,71 @@
 - name: Deploy Traefik
   hosts: traefik
   become: true
+
+  pre_tasks:
+    - name: Include traefik secrets
+      include_vars:
+        file: "{{ paths.credentials }}/{{ repositories.credentials.paths.ansible_vars }}/traefik/secrets.yml"
+        name: traefik_secrets
+
   tasks:
-    - name: Copy Traefik files to target server
-      copy:
-        src: "~/homelab/apps/traefik/"
-        dest: /home/traefik-user/traefik/
-        owner: traefik-user
-        group: traefik-user
-        mode: '0755'
+    - name: Create Traefik directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        owner: "{{ traefik_secrets.traefik_system.user }}"
+        group: "{{ traefik_secrets.traefik_system.user }}"
+        mode: "{{ traefik.permissions.config }}"
+      loop:
+        - "{{ traefik_secrets.traefik_system.home_dir }}"
+        - "{{ traefik_secrets.traefik_system.home_dir }}/data"
 
-    - name: Copy credentials to target server
-      copy:
-        src: "~/credentials/apps/traefik/"
-        dest: /home/traefik-user/traefik/data/
-        owner: traefik-user
-        group: traefik-user
-        # mode: '0600'
+    # Copy public repo files first
+    - name: Copy Traefik files from public repo
+      ansible.builtin.copy:
+        src: "{{ paths.homelab }}/apps/traefik/"
+        dest: "{{ traefik_secrets.traefik_system.home_dir }}/"
+        owner: "{{ traefik_secrets.traefik_system.user }}"
+        group: "{{ traefik_secrets.traefik_system.user }}"
+        mode: "{{ traefik.permissions.config }}"
 
-    - name: Set permissions on acme.json
-      file:
-        path: /home/traefik-user/traefik/data/acme.json
-        mode: '0600'
-      become: true
-      become_user: root
+    # Then overlay the secret files from private repo using group_vars paths
+    - name: Copy Traefik secrets.yml from private repo
+      ansible.builtin.copy:
+        src: "{{ paths.credentials }}/apps/traefik/data/secrets.yml"
+        dest: "{{ traefik.files.secrets }}"
+        owner: "{{ traefik_secrets.traefik_system.user }}"
+        group: "{{ traefik_secrets.traefik_system.user }}"
+        mode: "{{ traefik.permissions.secrets }}"
 
-    - name: Set permissions on secrets.sh script
-      file:
-        path: /home/traefik-user/traefik/secrets.sh
-        mode: '0755'
-      become: true
-      become_user: root
+    - name: Copy acme.json from private repo
+      ansible.builtin.copy:
+        src: "{{ paths.credentials }}/apps/traefik/data/acme.json"
+        dest: "{{ traefik.files.acme }}"
+        owner: "{{ traefik_secrets.traefik_system.user }}"
+        group: "{{ traefik_secrets.traefik_system.user }}"
+        mode: "{{ traefik.permissions.acme }}"
 
     - name: Run secrets.sh script
-      command: /home/traefik-user/traefik/secrets.sh
+      ansible.builtin.command: "./secrets.sh"
       args:
-        chdir: /home/traefik-user/traefik/
+        chdir: "{{ traefik_secrets.traefik_system.home_dir }}"
       become: true
       become_user: root
 
-    - name: Create docker network proxy with sudo
-      command: sudo docker network create proxy
-      become: true
-      become_user: root
+    - name: Create docker network proxy
+      ansible.builtin.command: docker network create {{ traefik.docker.network }}
       ignore_errors: true
       register: docker_network_error
 
-    - name: Display error message if the previous task failed
-      debug:
-        msg: >
-          "The task failed with the following error:
-          {{ docker_network_error.stderr }}"
+    - name: Display error message if network creation failed
+      ansible.builtin.debug:
+        msg: "Network creation failed: {{ docker_network_error.stderr }}"
       when: docker_network_error.failed
 
-    - name: Run docker-compose up with sudo
-      command: sudo docker-compose up -d --force-recreate
+    - name: Run docker-compose
+      ansible.builtin.command: docker-compose up -d --force-recreate
       args:
-        chdir: /home/traefik-user/traefik
+        chdir: "{{ traefik_secrets.traefik_system.home_dir }}"
       become: true
       become_user: root

@@ -1,0 +1,40 @@
+---
+# Common variables used across all playbooks
+common:
+  timezone: "America/New_York"
+  ansible_user: "ansible"
+
+# Directory structure (using absolute paths)
+paths:
+  base: "/home/ansible"
+  homelab: "/home/ansible/homelab"
+  terraform: "/home/ansible/terraform"
+  credentials: "/home/ansible/credentials"
+  k3s: "/home/ansible/k3s-ansible"
+
+# Repository configurations
+repositories:
+  homelab:
+    version: "feature/ansible-kubernetes"
+  credentials:
+    version: "develop"
+    paths:
+      ansible_vars: "ansible/group_vars"
+      inventory:
+        main: "ansible/inventory/inventory"
+        k3s: "ansible/inventory/k3s_inventory"
+      k3s:
+        secrets: "ansible/group_vars/k3s/secrets.yml"
+      traefik:
+        secrets: "ansible/group_vars/traefik/secrets.yml"
+      ssh_keys: "ssh"
+  k3s:
+    url: "https://github.com/techno-tim/k3s-ansible.git"
+    version: "master"
+
+# SSH key configurations
+ssh_keys:
+  github:
+    file_mode: "0600"
+  ansible:
+    file_mode: "0600"

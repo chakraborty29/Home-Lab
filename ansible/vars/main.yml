@@ -1,7 +1,0 @@
----
-# vars/configure_builder_server.yml
-
-github_private_key_src: "~/Desktop/Projects/home-lab-creds/ssh/github_rsa"
-ansible_private_key_src: "~/Desktop/Projects/home-lab-creds/ssh/ansible_id_rsa"
-homelab_repo_url: "git@github.com:chakraborty29/Home-Lab.git"
-credentials_repo_url: "git@github.com:chakraborty29/home-lab-creds.git"
