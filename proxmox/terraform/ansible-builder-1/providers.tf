@@ -3,9 +3,7 @@
 # Initial Provider Configuration for Proxmox
 
 terraform {
-
-    required_version = "1.9.5"
-
+    required_version = "~> 1.9.0"    # Allows any 1.9.x version
     required_providers {
         proxmox = {
             source = "telmate/proxmox"
