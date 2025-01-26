@@ -1,35 +1,54 @@
 ---
-- name: Get target IP from inventory
-  set_fact:
-    target_ip: "{{ hostvars[item].ansible_host }}"
+- name: Create K3s VMs
+  hosts: localhost
+  gather_facts: false
+  become: true
+  vars:
+    target_vm: ""  # Can be set via --extra-vars "target_vm=k3s-master-1"
 
-- name: Ping the target IP
-  shell: "ping -c 1 -W 1 {{ target_ip }}"
-  register: ping_result
-  ignore_errors: true
+  tasks:
+    - name: Set VM list
+      set_fact:
+        vm_list: "{{ [target_vm] if target_vm != '' else (groups['master'] + groups['node']) }}"
 
-- name: Copy template files for VM if not alive
-  synchronize:
-    src: "{{ terraform_dir }}/templates/terraform-base-template/"
-    dest: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}"
-    mode: push
+    - name: Create terraform directories
+      ansible.builtin.file:
+        path: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
+        state: directory
+        mode: '0755'
+        owner: "{{ common.ansible_user }}"
+        group: "{{ common.ansible_user }}"
+      loop: "{{ vm_list }}"
 
-# - name: Copy template files for VM if not alive
-#   command: "cp -R {{ homelab_dir }}/templates/terraform-base-template {{ homelab_dir }}/proxmox/terraform/k3s/{{ item }}"
-#   when: ping_result.rc != 0
+    - name: Copy terraform templates
+      ansible.builtin.synchronize:
+        src: "{{ paths.homelab }}/templates/terraform-base-template/"
+        dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}"
+        mode: push
+      loop: "{{ vm_list }}"
+      become: false
 
-- name: Copy config file for VM if not alive
-  command: "cp {{ credentials_dir }}/k3s/{{ item }}.tfvars {{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
-  when: ping_result.rc != 0
+    - name: Copy tfvars files
+      ansible.builtin.copy:
+        src: "{{ paths.credentials }}/k3s/{{ item }}.tfvars"
+        dest: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars"
+        mode: '0644'
+        owner: "{{ common.ansible_user }}"
+        group: "{{ common.ansible_user }}"
+      loop: "{{ vm_list }}"
 
-- name: Initiate Terraform
-  command: "terraform init"
-  args:
-    chdir: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/"
-  when: ping_result.rc != 0
+    - name: Initialize terraform
+      ansible.builtin.command: terraform init
+      args:
+        chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+      loop: "{{ vm_list }}"
+      become_user: "{{ common.ansible_user }}"
 
-- name: Build VM if target is not alive
-  command: "terraform apply -auto-approve -var-file='{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'"
-  args:
-    chdir: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/"
-  when: ping_result.rc != 0
+    - name: Create/Update VM
+      ansible.builtin.command: >
+        terraform apply -auto-approve 
+        -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
+      args:
+        chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+      loop: "{{ vm_list }}"
+      become_user: "{{ common.ansible_user }}"

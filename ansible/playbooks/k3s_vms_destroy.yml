@@ -1,15 +1,29 @@
 ---
-- name: Get target IP from inventory
-  set_fact:
-    target_ip: "{{ hostvars[item].ansible_host }}"
+- name: Destroy K3s VMs
+  hosts: localhost
+  gather_facts: false
+  vars:
+    target_vm: ""  # Can be set via --extra-vars "target_vm=k3s-master-1"
 
-- name: Ping the target IP
-  shell: "ping -c 1 -W 1 {{ target_ip }}"
-  register: ping_result
-  ignore_errors: true
+  tasks:
+    - name: Set VM list
+      set_fact:
+        vm_list: "{{ [target_vm] if target_vm != '' else (groups['master'] + groups['node']) }}"
 
-- name: Build VM if target is alive
-  command: "terraform destroy -var-file='{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'"
-  args:
-    chdir: "{{ terraform_dir }}/proxmox/terraform/k3s/{{ item }}/"
-  when: ping_result.rc == 0
+    - name: Destroy VMs
+      ansible.builtin.command: >
+        terraform destroy -auto-approve 
+        -var-file='{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/{{ item }}.tfvars'
+      args:
+        chdir: "{{ paths.terraform }}/proxmox/terraform/k3s/{{ item }}/"
+      loop: "{{ vm_list }}"
+      register: terraform_destroy
+
+    - name: Wait for VMs to be destroyed
+      ansible.builtin.wait_for:
+        host: "{{ hostvars[item].ansible_host }}"
+        port: 22
+        timeout: 300
+        state: stopped
+      loop: "{{ vm_list }}"
+      when: terraform_destroy is success

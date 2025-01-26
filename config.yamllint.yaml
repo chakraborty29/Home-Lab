@@ -7,3 +7,5 @@ rules:
     max: 80
     level: warning
   comments-indentation: disable  # don't bother me with this rule
+  trailing-spaces:
+    level: warning    # or use "disable" to completely ignore trailing spaces
