@@ -105,7 +105,7 @@ http:
     minecraft:
       loadBalancer:
         servers:
-          - url: "https://{minecraft-ip-address}:9443"
+          - url: "https://{minecraft-ip-address}:9000"
         passHostHeader: true
 
   middlewares:
