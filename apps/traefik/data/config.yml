@@ -59,6 +59,15 @@ http:
         - https-redirectscheme
       tls: {}
       service: opnsense
+    minecraft:
+      entryPoints:
+        - "https"
+      rule: "Host(`{minecraft-domain-name}`)"
+      middlewares:
+        - default-headers
+        - https-redirectscheme
+      tls: {}
+      service: minecraft
 
   services:
     pve1:
@@ -92,6 +101,11 @@ http:
       loadBalancer:
         servers:
           - url: "https://{opnsense-ip-address}"
+        passHostHeader: true
+    minecraft:
+      loadBalancer:
+        servers:
+          - url: "https://{minecraft-ip-address}:9443"
         passHostHeader: true
 
   middlewares:
