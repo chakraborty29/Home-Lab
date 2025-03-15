@@ -12,9 +12,9 @@ Two years on, I've finally had the chance to dive back in. My toolkit now includ
 
 Here are a few features I envision for my home lab:
 
-~~1. A Kubernetes Cluster to run my applications.~~
+1. ~~A Kubernetes Cluster to run my applications.~~
 2. A Jenkins setup for CI/CD processes (potentially integrated within Kubernetes).
-~~3. A VPN Service to ensure secure remote access into my network.~~
+3. ~~A VPN Service to ensure secure remote access into my network.~~
 4. Developing my own internal SSO Client to streamline authentication.
 5. Internally hosted GitLab and many other enterprise softwares.
 
