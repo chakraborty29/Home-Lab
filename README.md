@@ -18,7 +18,7 @@ Here are a few features I envision for my home lab:
 4. Developing my own internal SSO Client to streamline authentication.
 
 ### Current State Architecture
-![Alt Text](https://raw.githubusercontent.com/chakraborty29/Home-Lab/develop/docs/src/current-state-architecture.png)
+![Alt Text](https://raw.githubusercontent.com/chakraborty29/Home-Lab/develop/docs/src/current-state-architecture.v1.png)
 
 ## Getting Started
 
