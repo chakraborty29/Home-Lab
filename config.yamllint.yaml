@@ -11,4 +11,4 @@ rules:
     level: warning    # or use "disable" to completely ignore trailing spaces
 
 ignore:
-  - templates/k3s/infisical/infisical-standlone/*
+  - templates/k3s/infisical/infisical-standalone/*
