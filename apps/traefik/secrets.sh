@@ -19,11 +19,13 @@ PVE3_DOMAIN_NAME=$(extract_value "PVE3_DOMAIN_NAME")
 PVE_DOMAIN_NAME=$(extract_value "PVE_DOMAIN_NAME")
 PIHOLE_DOMAIN_NAME=$(extract_value "PIHOLE_DOMAIN_NAME")
 OPNSENSE_DOMAIN_NAME=$(extract_value "OPNSENSE_DOMAIN_NAME")
+MINECRAFT_DOMAIN_NAME=$(extract_value "MINECRAFT_DOMAIN_NAME")
 PVE1_IP_ADDR=$(extract_value "PVE1_IP_ADDR")
 PVE2_IP_ADDR=$(extract_value "PVE2_IP_ADDR")
 PVE3_IP_ADDR=$(extract_value "PVE3_IP_ADDR")
 PIHOLE_IP_ADDRESS=$(extract_value "PIHOLE_IP_ADDRESS")
 OPNSENSE_IP_ADDRESS=$(extract_value "OPNSENSE_IP_ADDRESS")
+MINECRAFT_IP_ADDRESS=$(extract_value "MINECRAFT_IP_ADDRESS")
 CF_API_EMAIL=$(extract_value "CF_API_EMAIL")
 CF_API_KEY=$(extract_value "CF_API_KEY")
 TRAEFIK_USER=$(extract_value "TRAEFIK_USER")
@@ -39,11 +41,13 @@ sed -i -e "s|{pve1-domain-name}|$PVE1_DOMAIN_NAME|g" \
        -e "s|{pve-domain-name}|$PVE_DOMAIN_NAME|g" \
        -e "s|{pihole-domain-name}|$PIHOLE_DOMAIN_NAME|g" \
        -e "s|{opnsense-domain-name}|$OPNSENSE_DOMAIN_NAME|g" \
+       -e "s|{minecraft-domain-name}|$MINECRAFT_DOMAIN_NAME|g" \
        -e "s|{pve1-ip-addr}|$PVE1_IP_ADDR|g" \
        -e "s|{pve2-ip-addr}|$PVE2_IP_ADDR|g" \
        -e "s|{pve3-ip-addr}|$PVE3_IP_ADDR|g" \
        -e "s|{pihole-ip-address}|$PIHOLE_IP_ADDRESS|g" \
        -e "s|{opnsense-ip-address}|$OPNSENSE_IP_ADDRESS|g" \
+       -e "s|{minecraft-ip-address}|$MINECRAFT_IP_ADDRESS|g" \
        "$CONFIG_FILE"
 
 echo "Configuration updated in $CONFIG_FILE."

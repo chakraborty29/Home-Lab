@@ -15,7 +15,7 @@ paths:
 # Repository configurations
 repositories:
   homelab:
-    version: "feature/ansible-kubernetes"
+    version: "develop"
   credentials:
     version: "develop"
     paths:
