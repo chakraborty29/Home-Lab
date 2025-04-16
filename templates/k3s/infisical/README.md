@@ -1,12 +1,12 @@
 # Install HA Infisical with Posgresql & Redis
 
 ### Pre-Requisites
-1. `cloudnative-pg` operator installed
-2. `longhorn` storage class (Can be any storage class of choice)
-3. `traefik` with `IngresRoutes` and wildcard tls certificate of your domain (Can be loadBalancer and reverse-proxy of choise)
-4. Self-signed certificate issuer CA - Will create docs for this at a later time
+1. [`cloudnative-pg`](https://cloudnative-pg.io/documentation/current/) operator installed
+2. [`longhorn`](https://longhorn.io/docs/1.8.1/) storage class (Can be any storage class of choice)
+3. [`traefik` with `IngresRoutes` and wildcard tls certificate of your domain (Can be loadBalancer and reverse-proxy of choise)](https://technotim.live/posts/kube-traefik-cert-manager-le/)
+4. [Self-signed certificate issuer CA](https://github.com/chakraborty29/Home-Lab/tree/develop/templates/k3s/cert-manager)
 5. `bitnami` helm charts installed
-6. The custom `infisical-standalone/` with the chart templates updated to allow for secure TLS connection for Posgres
+6. The custom `infisical-standalone/` in this dir with the chart templates updated to allow for secure TLS connection for Posgres
 
 ### Create Namespace for Infisical
 ```
