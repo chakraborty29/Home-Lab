@@ -43,6 +43,12 @@
         dest: "{{ paths.k3s }}/inventory/my-cluster/group_vars/k3s_secrets.yml"
         mode: '0600'
 
+    - name: Copy k3s inventory
+      ansible.builtin.copy:
+        src: "{{ paths.credentials }}/{{ repositories.credentials.paths.inventory.k3s }}"
+        dest: "{{ paths.k3s }}/inventory/my-cluster/hosts.ini"
+        mode: '0644'
+
     - name: Wait for all nodes to be ready
       ansible.builtin.wait_for:
         host: "{{ hostvars[item].ansible_host }}"
